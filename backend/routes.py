@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, redirect
+from flask import Blueprint, jsonify, redirect, request
 from spotipy_handler import authorize, handle_callback, clear_session, get_playlists
 from dotenv import load_dotenv
 import os
@@ -15,8 +15,8 @@ def login():
 
 @routes.route("/callback")
 def callback():
-    handle_callback()
-    return redirect('wrapped_playlists')
+    redirect_url = handle_callback()
+    return redirect(redirect_url)
 
 @routes.route('/sign_out')
 def sign_out():
@@ -26,13 +26,17 @@ def sign_out():
 @routes.route('/wrapped_playlists', methods=['GET'])
 def get_wrapped_playlists():
     try:
-        wrapped_playlists = get_playlists()
+        wrapped_playlists = get_playlists(request.access_token)
     except Exception as e:
         print(e)
         return redirect('/')
 
     return jsonify(wrapped_playlists)
 
-@routes.route('/get_wrapped_playlists', methods=['GET'])
-def wrapped():
-    print('all wrapped')
+
+# extract access token from header at each request
+def extract_access_token():
+    header_value = request.headers.get('Authorization')
+    if header_value is not None and header_value.startswith('Bearer '):
+        access_token = header_value.split(' ')[1]
+        request.access_token = access_token
