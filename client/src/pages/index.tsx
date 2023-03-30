@@ -6,7 +6,7 @@ import Link from 'next/link'
 
 const inter = Inter({ subsets: ['latin'] })
 
-export default function Home() {
+export default function Login() {
   return (
     <>
       <Head>
@@ -18,7 +18,7 @@ export default function Home() {
       <main className={styles.main}>
         <a href="http://127.0.0.1:5000/">Click here to start</a>
         <a href="http://127.0.0.1:5000/sign_out">Sign Out</a>
-        <Link href='/trends'>
+        <Link href='/home'>
           <button>Trends</button>
         </Link>
       </main>
