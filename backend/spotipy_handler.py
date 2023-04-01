@@ -38,6 +38,20 @@ def handle_callback():
 def clear_session():
     session.pop("token_info", None)
 
+def get_user(access_token):
+    """
+    Gets the logged in Spotify user
+    
+    :param access_token: Spotify access token
+    :return: Logged in Spotify uesr
+    """
+    sp = create_spotify_client(access_token)
+    if not sp:
+        abort(401, "No token")
+
+    user = sp.current_user()
+    return user
+
 def get_playlists(access_token):
     """
     Gets all the Wrapped Playlists belonging to the user

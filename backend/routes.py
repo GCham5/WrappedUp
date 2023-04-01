@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, redirect, request
-from spotipy_handler import authorize, handle_callback, clear_session, get_playlists
+from spotipy_handler import authorize, handle_callback, clear_session, get_playlists, get_user
 from dotenv import load_dotenv
 import os
 
@@ -23,6 +23,23 @@ def sign_out():
     clear_session()
     return redirect('http://localhost:3000/')
 
+@routes.route('/user')
+def user():
+    try:
+        user = get_user(request.access_token)
+    except Exception as e:
+        print(e)
+    return user
+
+
+# @routes.route('/refresh')
+# def refresh():
+#     try:
+#         token = refresh_token(request.refresh_token)
+#     except Exception as e:
+#         print(e)
+#     return token
+    
 @routes.route('/wrapped_playlists', methods=['GET'])
 def get_wrapped_playlists():
     try:
