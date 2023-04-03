@@ -81,8 +81,10 @@ def get_playlists(access_token):
             artists = get_artists_data(playlist_tracks)
             # genres = get_genres(sp, artists)
             audio_features = get_audio_features(sp, playlist_tracks)
+            mood = get_mood(audio_features)
+            print(mood)
             total_duration = get_total_duration(playlist_tracks)
-            cleaned_up_playlist = create_playlist_dict(playlist, playlist_tracks, artists, audio_features, total_duration)
+            cleaned_up_playlist = create_playlist_dict(playlist, playlist_tracks, artists, audio_features, mood, total_duration)
             wrapped_playlists.append(cleaned_up_playlist)
     # print(wrapped_playlists)
     return wrapped_playlists
@@ -120,6 +122,27 @@ def get_audio_features(sp, playlist_tracks):
         }
 
     return summary_of_stats
+
+def get_mood(audio_features):
+    """
+    Determines if the playlist is overall happy or sad
+    
+    :param audio_features: The calculated audio_features of the playlist
+    :return: Mood value ranging from 0-1, with 0 being the saddest and 1 being the happiest
+    """
+    energy = audio_features['energy']['mean']
+    valence = audio_features['valence']['mean']
+    tempo = audio_features['tempo']['mean']
+
+    # Normalize the values to be between 0 and 1
+    energy_norm = (energy - 0.0) / (1.0 - 0.0)
+    valence_norm = (valence - 0.0) / (1.0 - 0.0)
+    tempo_norm = (tempo - 0.0) / (250.0 - 0.0)
+
+    mood = (valence_norm * 1.5 + energy_norm * 1.0 + tempo_norm * 0.5) / 3.0
+
+    return mood
+
 
 def get_total_duration(playlist_tracks):
     """
@@ -171,7 +194,7 @@ def get_genres(sp, artists):
 
 
 
-def create_playlist_dict(playlist, playlist_tracks, artists, audio_features, total_duration):
+def create_playlist_dict(playlist, playlist_tracks, artists, audio_features, mood, total_duration):
     """
     Creates a simplified, cleaner playlist objecct to send back to the client.
     
@@ -179,6 +202,7 @@ def create_playlist_dict(playlist, playlist_tracks, artists, audio_features, tot
     :param playlist_tracks: All the tracks of the playlist
     :param artists: All the artists found in the playlist
     :param audio_features: Total summary of the audio features of the playlist
+    :param mood: A value between 0-1 that indicates how happy or sad the year was
     :param total_duration: Total duration in hours of the playlist
     :return: Dictionary with playlist info
     """
@@ -192,7 +216,8 @@ def create_playlist_dict(playlist, playlist_tracks, artists, audio_features, tot
         'url': playlist['external_urls']['spotify'],
         'tracks': playlist_tracks,
         'artists': artists,
-        'audioFeatures': audio_features
+        'audioFeatures': audio_features,
+        'mood': mood
     }
     return playlist_dict
 
