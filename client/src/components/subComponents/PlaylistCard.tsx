@@ -18,7 +18,7 @@ export default function PlaylistCard({ playlist }) {
           component="img"
           height="200"
           image={playlist.image}
-          alt="green iguana"
+          alt="playlist image"
         />
         <CardContent>
           <Typography gutterBottom variant="h5" component="div">
