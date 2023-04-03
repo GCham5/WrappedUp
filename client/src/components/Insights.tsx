@@ -12,10 +12,10 @@ export default function Insights({ playlistData }) {
             {/* <main className={styles.main}> */}
             <h1>Insights</h1>
             <ul>
-                {playlistData.map(data => (
-                    <li key={data.playlist.id}>
+                {playlistData.map(playlist => (
+                    <li key={playlist.id}>
                         {/* {data.playlist.name} */}
-                        {data.tracks[0].track.artists[0].name}
+                        {playlist.tracks[0].artists[0].name}
                     </li>
                 ))}
             </ul>
