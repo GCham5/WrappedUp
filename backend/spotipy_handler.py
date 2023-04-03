@@ -54,7 +54,7 @@ def get_user(access_token):
 
 def get_playlists(access_token):
     """
-    Gets all the Wrapped Playlists belonging to the user
+    Gets all the Wrapped Playlists belonging to the user, alongside revelant data
     
     :param access_token: Spotify access token
     :return: Wrapped Playlists with playlist info, tracks, audio features and duration
@@ -78,9 +78,11 @@ def get_playlists(access_token):
     for playlist in all_playlists:
         if playlist['name'].startswith('Your Top Songs'):
             playlist_tracks = [item['track'] for item in sp.playlist_tracks(playlist['id'])['items']]
+            artists = get_artists_data(playlist_tracks)
+            # genres = get_genres(sp, artists)
             audio_features = get_audio_features(sp, playlist_tracks)
             total_duration = get_total_duration(playlist_tracks)
-            cleaned_up_playlist = create_playlist_dict(playlist, playlist_tracks, audio_features, total_duration)
+            cleaned_up_playlist = create_playlist_dict(playlist, playlist_tracks, artists, audio_features, total_duration)
             wrapped_playlists.append(cleaned_up_playlist)
     # print(wrapped_playlists)
     return wrapped_playlists
@@ -129,13 +131,53 @@ def get_total_duration(playlist_tracks):
 
     return sum([track['duration_ms'] for track in playlist_tracks if track is not None])/3600000
 
+def get_artists_data(playlist_tracks):
+    """
+    Gets all the artists for the playlist.
+    
+    :param playlist_tracks: All the tracks of the playlist
+    :return: The artists found in the playlist.
+    """
 
-def create_playlist_dict(playlist, playlist_tracks, audio_features, total_duration):
+    all_artists = [track['artists'] for track in playlist_tracks]
+    artist_data = {}
+    for artists_in_track in all_artists:
+        for artist in artists_in_track: # some songs can have mutliple artists
+            if artist['id'] not in artist_data:
+                artist_data[artist['id']] = {
+                    'name': artist['name'],
+                    'count': 0
+                }
+            artist_data[artist['id']]['count'] += 1
+
+    sorted_data = dict(sorted(artist_data.items(), key=lambda x: x[1]['count'], reverse=True))
+
+    return sorted_data
+
+def get_genres(sp, artists):
+    """
+    Gets the genres associated with playlist.
+    
+    :param artists: All artists in playlist, alongside their count
+    :return: The genres found in the playlist.
+    """
+
+    ids = list(artists.keys())
+    # print(ids)
+    for id in ids:
+        genres_of_artist = sp.artist(id)['genres']
+    print(genres_of_artist)
+
+
+
+
+def create_playlist_dict(playlist, playlist_tracks, artists, audio_features, total_duration):
     """
     Creates a simplified, cleaner playlist objecct to send back to the client.
     
     :param playlist: The full playlist object returned by Spotift Web API
     :param playlist_tracks: All the tracks of the playlist
+    :param artists: All the artists found in the playlist
     :param audio_features: Total summary of the audio features of the playlist
     :param total_duration: Total duration in hours of the playlist
     :return: Dictionary with playlist info
@@ -149,6 +191,7 @@ def create_playlist_dict(playlist, playlist_tracks, audio_features, total_durati
         'year': playlist['name'][-4:],
         'url': playlist['external_urls']['spotify'],
         'tracks': playlist_tracks,
+        'artists': artists,
         'audioFeatures': audio_features
     }
     return playlist_dict
