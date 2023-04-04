@@ -5,6 +5,7 @@ from spotipy import oauth2
 from dotenv import load_dotenv
 import os
 import statistics
+import uuid
 
 load_dotenv()
 
@@ -13,39 +14,65 @@ client_secret = os.getenv("SPOTIPY_CLIENT_SECRET")
 redirect_uri = os.getenv("SPOTIPY_REDIRECT_URI")
 scope = "user-library-read playlist-read-private user-top-read"
 
-auth_manager = oauth2.SpotifyOAuth(client_id=client_id, client_secret=client_secret, redirect_uri=redirect_uri, scope=scope,show_dialog=True)
+def session_cache_path():
+    """Get the path to the session cache folder."""
+    caches_folder = "./.spotify_caches/"
+    if not os.path.exists(caches_folder):
+        os.makedirs(caches_folder)
+    return caches_folder + session.get('uuid')
 
 def authorize():
+    print(session.get('uuid'))
+    # if not session.get('uuid'):
+        # Step 1. Visitor is unknown, give random ID
+    session['uuid'] = str(uuid.uuid4())
+ 
+    cache_handler = spotipy.cache_handler.CacheFileHandler(cache_path=session_cache_path())
+    auth_manager = oauth2.SpotifyOAuth(cache_handler=cache_handler,client_id=client_id, client_secret=client_secret, redirect_uri=redirect_uri, scope=scope,show_dialog=True)
+
     auth_url = auth_manager.get_authorize_url()
     return auth_url
 
 def handle_callback():
+    print(session)
+
+    print(session.get('uuid'), 'callback')
+    cache_handler = spotipy.cache_handler.CacheFileHandler(cache_path=session_cache_path())
+    auth_manager = oauth2.SpotifyOAuth(cache_handler=cache_handler,client_id=client_id, client_secret=client_secret, redirect_uri=redirect_uri, scope=scope,show_dialog=True)
+
     code = request.args.get('code')
+    auth_manager.get_access_token(code)
     token_info = auth_manager.get_access_token(code)
     access_token = token_info['access_token']
     refresh_token = token_info['refresh_token']
+    uuid = session['uuid']
+    # query_params = {
+    #     'access_token': access_token,
+    #     'refresh_token': refresh_token
+    # }
     query_params = {
-        'access_token': access_token,
-        'refresh_token': refresh_token
+        'uuid': uuid
     }
     query_string = urlencode(query_params)
     redirect_url = f'http://localhost:3000/home?{query_string}'
     # session['token_info'] = token_info
     # session['access_token'] = token_info['access_token']
+    spotify = spotipy.Spotify(auth_manager=auth_manager)
+    print(spotify.me())
     return redirect_url
     
 # TODO: properly implement
 def clear_session():
     session.pop("token_info", None)
 
-def get_user(access_token):
+def get_user(uid):
     """
     Gets the logged in Spotify user
     
     :param access_token: Spotify access token
     :return: Logged in Spotify uesr
     """
-    sp = create_spotify_client(access_token)
+    sp = create_spotify_client(uid)
     if not sp:
         abort(401, "No token")
 
@@ -54,7 +81,7 @@ def get_user(access_token):
     user['topArtists'] = top_artists['items']
     return user
 
-def get_playlists(access_token):
+def get_playlists(uid):
     """
     Gets all the Wrapped Playlists belonging to the user, alongside revelant data
     
@@ -62,7 +89,7 @@ def get_playlists(access_token):
     :return: Wrapped Playlists with playlist info, tracks, audio features and duration
     """
 
-    sp = create_spotify_client(access_token)
+    sp = create_spotify_client(uid)
     if not sp:
         abort(401, "No token")
 
@@ -88,8 +115,11 @@ def get_playlists(access_token):
             total_duration = get_total_duration(playlist_tracks)
             cleaned_up_playlist = create_playlist_dict(playlist, playlist_tracks, artists, audio_features, mood, total_duration)
             wrapped_playlists.append(cleaned_up_playlist)
+    # if a user unliked then liked their Wrapped, it would appear first
+    # this ensures the playlists appear in correct order 
+    sorted_playlists = sorted(wrapped_playlists, key=lambda x: x['year'], reverse=True)
     # print(wrapped_playlists)
-    return wrapped_playlists
+    return sorted_playlists
 
 
 
@@ -194,8 +224,6 @@ def get_genres(sp, artists):
     print(genres_of_artist)
 
 
-
-
 def create_playlist_dict(playlist, playlist_tracks, artists, audio_features, mood, total_duration):
     """
     Creates a simplified, cleaner playlist objecct to send back to the client.
@@ -223,15 +251,23 @@ def create_playlist_dict(playlist, playlist_tracks, artists, audio_features, moo
     }
     return playlist_dict
 
-def create_spotify_client(access_token):
+def create_spotify_client(uid):
     """
     Creates Spotify client with spotipy.
     
     :param access_token: Spotify access token
     :return: spotipy client
     """
+    print(uid)
+    print(session, 'client agina')
+    session['uuid'] = uid
+    print(session)
+    cache_handler = spotipy.cache_handler.CacheFileHandler(cache_path=session_cache_path())
+    # cache_handler = spotipy.cache_handler.FlaskSessionCacheHandler(session)
+    auth_manager = oauth2.SpotifyOAuth(cache_handler=cache_handler,client_id=client_id, client_secret=client_secret, redirect_uri=redirect_uri, scope=scope,show_dialog=True)
 
-    if not access_token:
+
+    if not auth_manager.validate_token(cache_handler.get_cached_token()):
         return None
-    sp = spotipy.Spotify(auth=access_token)
+    sp = spotipy.Spotify(auth_manager=auth_manager)
     return sp

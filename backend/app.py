@@ -12,8 +12,8 @@ os.environ['FLASK_ENV'] = os.getenv("FLASK_ENV")
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 app.secret_key = os.getenv("SECRET_KEY")
-# app.config['SESSION_TYPE'] = 'filesystem'
-# Session(app)
+app.config['SESSION_TYPE'] = 'filesystem'
+Session(app)
 app.before_request(extract_access_token)
 
 

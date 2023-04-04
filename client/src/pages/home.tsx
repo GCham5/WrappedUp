@@ -79,12 +79,13 @@ export default function Home() {
         // TODO: make this its own function
         const queryString = window.location.search;
         const urlParams = new URLSearchParams(queryString);
-        const accessToken = urlParams.get('access_token');
-        const refreshToken = urlParams.get('refresh_token');
-        localStorage.setItem('access_token', accessToken);
-        localStorage.setItem('refresh_token', refreshToken);
-        setAccessToken(accessToken)
-        setRefreshToken(refreshToken)
+        const uuid = urlParams.get('uuid')
+        // const accessToken = urlParams.get('access_token');
+        // const refreshToken = urlParams.get('refresh_token');
+        // localStorage.setItem('access_token', accessToken);
+        // localStorage.setItem('refresh_token', refreshToken);
+        // setAccessToken(accessToken)
+        // setRefreshToken(refreshToken)
 
 
         async function fetchWrappedPlaylists() {
@@ -92,7 +93,7 @@ export default function Home() {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${accessToken}`
+                    'Authorization': `Bearer ${uuid}`
                 },
             })
             const data = await res.json()
@@ -105,7 +106,7 @@ export default function Home() {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${accessToken}`
+                    'Authorization': `Bearer ${uuid}`
                 },
             })
             const data = await res.json()

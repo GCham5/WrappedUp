@@ -26,7 +26,7 @@ def sign_out():
 @routes.route('/user')
 def user():
     try:
-        user = get_user(request.access_token)
+        user = get_user(request.uuid)
     except Exception as e:
         print(e)
     return user
@@ -43,7 +43,7 @@ def user():
 @routes.route('/wrapped_playlists', methods=['GET'])
 def get_wrapped_playlists():
     try:
-        wrapped_playlists = get_playlists(request.access_token)
+        wrapped_playlists = get_playlists(request.uuid)
     except Exception as e:
         print(e)
         return redirect('/')
@@ -55,5 +55,5 @@ def get_wrapped_playlists():
 def extract_access_token():
     header_value = request.headers.get('Authorization')
     if header_value is not None and header_value.startswith('Bearer '):
-        access_token = header_value.split(' ')[1]
-        request.access_token = access_token
+        uuid = header_value.split(' ')[1]
+        request.uuid = uuid
