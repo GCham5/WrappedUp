@@ -33,7 +33,7 @@ export function LineChart(props) {
         boxShadow: '10px 10px 5px rgba(0, 0, 0, 0.2)',
     }
 
-    const labels = [...props.data.map(playlist => playlist.year)].reverse();
+    const labels = props.data.map(playlist => playlist.year).reverse();
     const dataArray = []
     for (const feature of props.dataset) {
         const dataset: any = {
@@ -59,6 +59,7 @@ export function LineChart(props) {
 
     const options = {
         responsive: true,
+        color: 'white',
         plugins: {
             legend: {
                 position: 'top' as const,

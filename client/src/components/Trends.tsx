@@ -4,6 +4,7 @@ import { Inter } from 'next/font/google'
 import styles from '@/styles/Home.module.css'
 import Link from 'next/link'
 import { LineChart } from './Charts/LineChart'
+import TopArtistsOverTime from '../components/TopArtistsOverTime'
 import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
 import { useEffect } from 'react'
@@ -11,11 +12,12 @@ import { useEffect } from 'react'
 
 const inter = Inter({ subsets: ['latin'] })
 
-export default function Trends({ playlistData }) {
+export default function Trends({ playlistData, userData }) {
 
-    useEffect(() => {
+    // useEffect(() => {
+    //     const token = localStorage.getItem('myToken');
 
-    }, [])
+    // }, [])
 
     return (
         <>
@@ -44,6 +46,9 @@ export default function Trends({ playlistData }) {
                         The emotional soundtrack of your life: A graph of your moods over time.
                     </Typography>
                     <LineChart title={''} data={playlistData} dataset={[{ 'key': 'mood', 'label': 'Mood' }]} value={''} />
+                </Grid>
+                <Grid item xs={12}>
+                    <TopArtistsOverTime playlistData={playlistData} userData={userData} />
                 </Grid>
 
                 {/* <LineChart title={'Features Of Wrapped Playlists Over Time'} playlistData={playlistData} dataset={[{ 'key': 'acousticness', 'label': 'Acousticness' }, { 'key': 'danceability', 'label': 'Danceability' }]} value={'mean'} /> */}

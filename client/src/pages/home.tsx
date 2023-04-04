@@ -19,6 +19,19 @@ const inter = Inter({ subsets: ['latin'] })
 
 export default function Home() {
 
+    type User = {
+        display_name: string;
+        id: string;
+        images: any[];
+        topArtists: {
+            id: string;
+            name: string;
+            populartiy: number;
+            genres: string[]
+        }[]
+    }
+
+
     type PlaylistData = {
         id: string;
         name: string;
@@ -47,7 +60,7 @@ export default function Home() {
     }
 
     const [wrappedPlaylists, setWrappedPlaylists] = useState<PlaylistData[]>([])
-    const [user, setUser] = useState();
+    const [user, setUser] = useState<User>();
     const [activeTab, setActiveTab] = useState('trends');
     const [accessToken, setAccessToken] = useState('');
     const [refreshToken, setRefreshToken] = useState('')
@@ -149,7 +162,7 @@ export default function Home() {
                         </Typography>
 
                         <Typography variant="h5" gutterBottom>
-                            Hello,  {user['display_name']}
+                            Hello,  {user.display_name}
                         </Typography>
 
                     </Grid>
@@ -165,7 +178,7 @@ export default function Home() {
                         <AllPlaylists playlists={wrappedPlaylists.map(data => ({ id: data.id, name: data.name, year: data.year, image: data.image, url: data.url }))} />
                     </Grid>
                     <Grid item xs={12}>
-                        {activeTab === 'trends' && <Trends playlistData={wrappedPlaylists} />}
+                        {activeTab === 'trends' && <Trends playlistData={wrappedPlaylists} userData={user} />}
                         {activeTab === 'insights' && <Insights playlistData={wrappedPlaylists} />}
                     </Grid>
                 </Grid>
