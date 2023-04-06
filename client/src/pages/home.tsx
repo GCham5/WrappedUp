@@ -1,8 +1,6 @@
 import Head from 'next/head'
 import Image from 'next/image'
-import { Inter } from 'next/font/google'
-import styles from '@/styles/Home.module.css'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Trends from '@/components/Trends'
 import Insights from '@/components/Insights'
 import AllPlaylists from '@/components/AllPlaylists'
@@ -11,11 +9,6 @@ import Box from '@mui/material/Box';
 import CircularProgress from '@mui/material/CircularProgress'
 import Typography from '@mui/material/Typography';
 import { Button } from '@mui/material'
-
-
-
-
-const inter = Inter({ subsets: ['latin'] })
 
 export default function Home() {
 
@@ -46,6 +39,12 @@ export default function Home() {
                 count: number
             }
         },
+        albums: {
+            id: {
+                name: string,
+                count: number
+            }
+        },
         tracks: {
             id: string;
             name: string;
@@ -70,8 +69,11 @@ export default function Home() {
         window.history.replaceState({}, '', newUrl);
     };
 
+    const sectionRef = useRef(null);
+
     const handleTabClick = (tab: string) => {
-        setActiveTab(tab)
+        setActiveTab(tab);
+        sectionRef.current.scrollIntoView({ behavior: 'smooth' });
     }
 
     useEffect(() => {
@@ -178,9 +180,9 @@ export default function Home() {
                     <Grid item xs={12}>
                         <AllPlaylists playlists={wrappedPlaylists.map(data => ({ id: data.id, name: data.name, year: data.year, image: data.image, url: data.url }))} />
                     </Grid>
-                    <Grid item xs={12}>
+                    <Grid item xs={12} ref={sectionRef}>
                         {activeTab === 'trends' && <Trends playlistData={wrappedPlaylists} userData={user} />}
-                        {activeTab === 'insights' && <Insights playlistData={wrappedPlaylists} />}
+                        {activeTab === 'insights' && <Insights playlistData={wrappedPlaylists} userData={user} />}
                     </Grid>
                 </Grid>
 
