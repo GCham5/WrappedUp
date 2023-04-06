@@ -42,8 +42,8 @@ export default function TopArtistsOverTime({ playlistData, userData }) {
 
     // get all the artists in all of the Wrappeds
     const allArtistsInPlaylists = playlistData.map(playlist => playlist.artists)
-    console.log(allArtistsInPlaylists)
-    console.log(topFiveArtists)
+    // console.log(allArtistsInPlaylists)
+    // console.log(topFiveArtists)
 
     // Loop through each top artist and check if they appeared in any of the Wrapped Playlists.
     // If they did, add the count (included in the allArtistsInPlaylists). If they did not, add 0
@@ -81,6 +81,7 @@ export default function TopArtistsOverTime({ playlistData, userData }) {
             label: artist['name'],
             fill: false,
             borderColor: `rgba(${red},${green},${blue},1)`,
+            backgroundColor: `rgba(${red},${green},${blue},0.5)`,
             tension: 0.3,
             data: artist['counts']
         }

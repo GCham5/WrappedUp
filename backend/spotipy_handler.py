@@ -22,7 +22,6 @@ def session_cache_path():
     return caches_folder + session.get('uuid')
 
 def authorize():
-    print(session.get('uuid'))
     # if not session.get('uuid'):
         # Step 1. Visitor is unknown, give random ID
     session['uuid'] = str(uuid.uuid4())
@@ -34,9 +33,6 @@ def authorize():
     return auth_url
 
 def handle_callback():
-    print(session)
-
-    print(session.get('uuid'), 'callback')
     cache_handler = spotipy.cache_handler.CacheFileHandler(cache_path=session_cache_path())
     auth_manager = oauth2.SpotifyOAuth(cache_handler=cache_handler,client_id=client_id, client_secret=client_secret, redirect_uri=redirect_uri, scope=scope,show_dialog=True)
 
@@ -108,17 +104,18 @@ def get_playlists(uid):
         if playlist['name'].startswith('Your Top Songs'):
             playlist_tracks = [item['track'] for item in sp.playlist_tracks(playlist['id'])['items']]
             artists = get_artists_data(playlist_tracks)
+            albums = get_albums_data(playlist_tracks)
             # genres = get_genres(sp, artists)
             audio_features = get_audio_features(sp, playlist_tracks)
             mood = get_mood(audio_features)
-            print(mood)
+            dance = get_dance(audio_features)
+            popularity = get_popularity(playlist_tracks)
             total_duration = get_total_duration(playlist_tracks)
-            cleaned_up_playlist = create_playlist_dict(playlist, playlist_tracks, artists, audio_features, mood, total_duration)
+            cleaned_up_playlist = create_playlist_dict(playlist, playlist_tracks, artists, albums, audio_features, mood, dance, popularity, total_duration)
             wrapped_playlists.append(cleaned_up_playlist)
     # if a user unliked then liked their Wrapped, it would appear first
     # this ensures the playlists appear in correct order 
     sorted_playlists = sorted(wrapped_playlists, key=lambda x: x['year'], reverse=True)
-    # print(wrapped_playlists)
     return sorted_playlists
 
 
@@ -175,6 +172,36 @@ def get_mood(audio_features):
 
     return mood
 
+def get_dance(audio_features):
+    """
+    Determines how danceable a playlist is
+    
+    :param audio_features: The calculated audio_features of the playlist
+    :return: Dance value ranging from 0-1, with 0 being the calm and 1 being the very danceable
+    """
+    energy = audio_features['energy']['mean']
+    danceability = audio_features['danceability']['mean']
+
+    # Normalize the values to be between 0 and 1
+    energy_norm = (energy - 0.0) / (1.0 - 0.0)
+    danceability_norm = (danceability - 0.0) / (1.0 - 0.0)
+
+    danceable = (danceability_norm * 2 + energy_norm * 1) / 3.0
+
+    return danceable
+
+def get_popularity(playlist_tracks):
+    """
+    Determines the popularity of the playlist by summing the popularity of all tracks and finding the average.
+    
+    :param playlist_tracks: All the tracks of the playlist
+    :return: Average popularity of the playlist.
+    """
+
+    # 100 because each Wrapped has 100 songs
+    return sum([track['popularity'] for track in playlist_tracks if track is not None])/100
+
+
 
 def get_total_duration(playlist_tracks):
     """
@@ -188,7 +215,7 @@ def get_total_duration(playlist_tracks):
 
 def get_artists_data(playlist_tracks):
     """
-    Gets all the artists for the playlist.
+    Gets all the artists for the playlist, alongside how many times they appeared.
     
     :param playlist_tracks: All the tracks of the playlist
     :return: The artists found in the playlist.
@@ -209,6 +236,29 @@ def get_artists_data(playlist_tracks):
 
     return sorted_data
 
+
+def get_albums_data(playlist_tracks):
+    """
+    Gets all the albums for the playlist, alongside how many times they appeared.
+    
+    :param playlist_tracks: All the tracks of the playlist
+    :return: The albums found in the playlist.
+    """
+
+    all_albums = [track['album'] for track in playlist_tracks]
+    album_data = {}
+    for album in all_albums:
+        if album['id'] not in album_data:
+            album_data[album['id']] = {
+                'name': album['name'],
+                'count': 0
+            }
+        album_data[album['id']]['count'] += 1
+
+    sorted_data = dict(sorted(album_data.items(), key=lambda x: x[1]['count'], reverse=True))
+
+    return sorted_data
+
 def get_genres(sp, artists):
     """
     Gets the genres associated with playlist.
@@ -224,15 +274,18 @@ def get_genres(sp, artists):
     print(genres_of_artist)
 
 
-def create_playlist_dict(playlist, playlist_tracks, artists, audio_features, mood, total_duration):
+def create_playlist_dict(playlist, playlist_tracks, artists, albums, audio_features, mood, dance, popularity, total_duration):
     """
     Creates a simplified, cleaner playlist objecct to send back to the client.
     
     :param playlist: The full playlist object returned by Spotift Web API
     :param playlist_tracks: All the tracks of the playlist
     :param artists: All the artists found in the playlist
+    :param albums: All the albums found in the playlist
     :param audio_features: Total summary of the audio features of the playlist
     :param mood: A value between 0-1 that indicates how happy or sad the year was
+    :param dance: A value between 0-1 that indicates how dancable the year was
+    :param popularity: Average popularity of the playlist
     :param total_duration: Total duration in hours of the playlist
     :return: Dictionary with playlist info
     """
@@ -243,11 +296,14 @@ def create_playlist_dict(playlist, playlist_tracks, artists, audio_features, moo
         'image': playlist['images'][0]['url'],
         'totalDuration': total_duration,
         'year': playlist['name'][-4:],
+        'popularity': popularity,
         'url': playlist['external_urls']['spotify'],
         'tracks': playlist_tracks,
         'artists': artists,
+        'albums': albums,
         'audioFeatures': audio_features,
-        'mood': mood
+        'mood': mood,
+        'dance': dance
     }
     return playlist_dict
 
