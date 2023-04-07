@@ -7,6 +7,7 @@ import os
 import statistics
 import uuid
 
+
 load_dotenv()
 
 client_id = os.getenv("SPOTIPY_CLIENT_ID")
@@ -103,15 +104,16 @@ def get_playlists(uid):
     for playlist in all_playlists:
         if playlist['name'].startswith('Your Top Songs'):
             playlist_tracks = [item['track'] for item in sp.playlist_tracks(playlist['id'])['items']]
-            artists = get_artists_data(playlist_tracks)
+            artists = get_artists(sp, playlist_tracks)
+            artists_data = get_artists_data(artists)
+            genres_data = get_genres(artists)
             albums = get_albums_data(playlist_tracks)
-            # genres = get_genres(sp, artists)
             audio_features = get_audio_features(sp, playlist_tracks)
             mood = get_mood(audio_features)
             dance = get_dance(audio_features)
             popularity = get_popularity(playlist_tracks)
             total_duration = get_total_duration(playlist_tracks)
-            cleaned_up_playlist = create_playlist_dict(playlist, playlist_tracks, artists, albums, audio_features, mood, dance, popularity, total_duration)
+            cleaned_up_playlist = create_playlist_dict(playlist, playlist_tracks, artists_data, genres_data, albums, audio_features, mood, dance, popularity, total_duration)
             wrapped_playlists.append(cleaned_up_playlist)
     # if a user unliked then liked their Wrapped, it would appear first
     # this ensures the playlists appear in correct order 
@@ -124,7 +126,7 @@ def get_audio_features(sp, playlist_tracks):
     """
     Gets audio features of all tracks in the playlist and performs calculations on the numbers.
     
-    :param sp: spotipy object.
+    :param sp: spotipy client
     :param playlist_tracks: All the tracks of the playlist
     :return: A total summary of the audio features.
     """
@@ -213,24 +215,48 @@ def get_total_duration(playlist_tracks):
 
     return sum([track['duration_ms'] for track in playlist_tracks if track is not None])/3600000
 
-def get_artists_data(playlist_tracks):
+def get_artists(sp, playlist_tracks):
     """
-    Gets all the artists for the playlist, alongside how many times they appeared.
+    Gets all the artists for the playlist
     
+    :param sp: spotipy client
     :param playlist_tracks: All the tracks of the playlist
     :return: The artists found in the playlist.
     """
 
     all_artists = [track['artists'] for track in playlist_tracks]
-    artist_data = {}
+    full_artist_data = []
+    ids = []
     for artists_in_track in all_artists:
-        for artist in artists_in_track: # some songs can have mutliple artists
-            if artist['id'] not in artist_data:
-                artist_data[artist['id']] = {
-                    'name': artist['name'],
-                    'count': 0
-                }
-            artist_data[artist['id']]['count'] += 1
+        for artist in artists_in_track:
+            ids.append(artist['id'])
+
+    # There will for sure be duplicate artists, hence redundant calls; however, since I will be counting how many times
+    # an artist appeared in the playlist, I need to keep all occurences
+    for i in range(0, len(ids), 50):
+        full_artist_data.extend(sp.artists(ids[i:i+50])['artists'])
+
+    return full_artist_data
+
+
+
+def get_artists_data(artists):
+    """
+    Gets the count and images for the artists
+    
+    :param artists: All the artists in the playlist
+    :return: The count and images for each artists.
+    """
+
+    artist_data = {}
+    for artist in artists:
+        if artist['id'] not in artist_data:
+            artist_data[artist['id']] = {
+                'name': artist['name'],
+                'count': 0,
+                'images': artist['images']
+            }
+        artist_data[artist['id']]['count'] += 1
 
     sorted_data = dict(sorted(artist_data.items(), key=lambda x: x[1]['count'], reverse=True))
 
@@ -259,28 +285,41 @@ def get_albums_data(playlist_tracks):
 
     return sorted_data
 
-def get_genres(sp, artists):
+def get_genres(artists):
     """
     Gets the genres associated with playlist.
     
-    :param artists: All artists in playlist, alongside their count
-    :return: The genres found in the playlist.
+    :param artists: All artists in playlist
+    :return: The genres found in the playlist, with their count.
     """
 
-    ids = list(artists.keys())
-    # print(ids)
-    for id in ids:
-        genres_of_artist = sp.artist(id)['genres']
-    print(genres_of_artist)
+    all_genres = []
+    for artist in artists:
+        all_genres.extend(artist['genres'])
+
+    genre_data = {}
+
+    for genre in all_genres:
+        if genre not in genre_data:
+            genre_data[genre] = {
+                'count': 0,
+            }
+        genre_data[genre]['count'] += 1
+
+    # sorted_data = dict(sorted(genre_data.items(), key=lambda x: x[1]['count'], reverse=True))
+
+    return genre_data
+    # return sorted_data
 
 
-def create_playlist_dict(playlist, playlist_tracks, artists, albums, audio_features, mood, dance, popularity, total_duration):
+def create_playlist_dict(playlist, playlist_tracks, artists_data, genre_data, albums, audio_features, mood, dance, popularity, total_duration):
     """
     Creates a simplified, cleaner playlist objecct to send back to the client.
     
     :param playlist: The full playlist object returned by Spotift Web API
     :param playlist_tracks: All the tracks of the playlist
-    :param artists: All the artists found in the playlist
+    :param artists_data: All the artists found in the playlist with their count
+    :param genre_data: All the genres found in the playlist with their count
     :param albums: All the albums found in the playlist
     :param audio_features: Total summary of the audio features of the playlist
     :param mood: A value between 0-1 that indicates how happy or sad the year was
@@ -299,7 +338,8 @@ def create_playlist_dict(playlist, playlist_tracks, artists, albums, audio_featu
         'popularity': popularity,
         'url': playlist['external_urls']['spotify'],
         'tracks': playlist_tracks,
-        'artists': artists,
+        'artists': artists_data,
+        'genres': genre_data,
         'albums': albums,
         'audioFeatures': audio_features,
         'mood': mood,
