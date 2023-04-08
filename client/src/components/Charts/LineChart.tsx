@@ -69,6 +69,32 @@ export function LineChart(props) {
                 text: props.title,
             },
         },
+        scales: {
+            y: {
+                // grid: {
+                //     // drawBorder: true,
+                //     color: 'white',
+                // },
+                ticks: {
+                    color: "white",
+                    font: {
+                        size: 15,
+                    },
+                    // stepSize: 3,
+                    // beginAtZero: true
+                }
+            },
+            x: {
+                ticks: {
+                    color: "white",
+                    font: {
+                        size: 14
+                    },
+                    // stepSize: 3,
+                    // beginAtZero: true
+                }
+            }
+        }
     };
 
 

@@ -15,7 +15,7 @@ export function PieChart(props) {
 
         const item = props.data[key];
         // if count is < 2, add this item to the 'Other' category in the Pie Chart
-        if (item['count'] < 2) {
+        if (item['count'] < props.threshold) {
             other++;
         } else {
             labels.push(item['name'])
@@ -49,7 +49,7 @@ export function PieChart(props) {
         labels: labels,
         datasets: [
             {
-                label: '# of Appearances',
+                label: props.label,
                 data: counts,
                 backgroundColor: backgroundColors,
                 borderColor: borderColors,
@@ -63,8 +63,8 @@ export function PieChart(props) {
         color: 'white',
         plugins: {
             legend: {
-                display: false,
-                position: 'top' as const,
+                display: true,
+                position: props.side,
             },
             title: {
                 // display: true,

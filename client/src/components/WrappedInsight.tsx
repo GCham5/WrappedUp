@@ -54,11 +54,11 @@ export default function WrappedInsight({ playlist }) {
                 <Grid item xs={12}>
                     <ReactWordcloud options={options} words={words} />
                 </Grid>
-                <Grid item xs={12} md={6}>
-                    <PieChart data={playlist.artists} />
+                <Grid item xs={12}>
+                    <PieChart data={playlist.genres} label={''} side={'right'} threshold={5} />
                 </Grid>
-                <Grid item xs={12} md={6}>
-                    <PieChart data={playlist.albums} />
+                <Grid item xs={12}>
+                    <PieChart data={playlist.albums} label={'# of Appearances'} side={'left'} threshold={2} />
                 </Grid>
 
                 {/* <LineChart title={'Features Of Wrapped Playlists Over Time'} playlistData={playlistData} dataset={[{ 'key': 'acousticness', 'label': 'Acousticness' }, { 'key': 'danceability', 'label': 'Danceability' }]} value={'mean'} /> */}
