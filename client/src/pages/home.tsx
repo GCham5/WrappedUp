@@ -45,6 +45,12 @@ export default function Home() {
                 count: number
             }
         },
+        genres: {
+            id: {
+                name: string,
+                count: number
+            }
+        },
         tracks: {
             id: string;
             name: string;

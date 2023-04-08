@@ -1,3 +1,4 @@
+from collections import Counter
 from flask import session, request, abort
 from urllib.parse import urlencode
 import spotipy
@@ -54,8 +55,8 @@ def handle_callback():
     redirect_url = f'http://localhost:3000/home?{query_string}'
     # session['token_info'] = token_info
     # session['access_token'] = token_info['access_token']
-    spotify = spotipy.Spotify(auth_manager=auth_manager)
-    print(spotify.me())
+    # spotify = spotipy.Spotify(auth_manager=auth_manager)
+    # print(spotify.me())
     return redirect_url
     
 # TODO: properly implement
@@ -302,6 +303,7 @@ def get_genres(artists):
     for genre in all_genres:
         if genre not in genre_data:
             genre_data[genre] = {
+                'name': genre, # add 'name' to make frontend PieChart reusable
                 'count': 0,
             }
         genre_data[genre]['count'] += 1
@@ -354,10 +356,8 @@ def create_spotify_client(uid):
     :param access_token: Spotify access token
     :return: spotipy client
     """
-    print(uid)
-    print(session, 'client agina')
+   
     session['uuid'] = uid
-    print(session)
     cache_handler = spotipy.cache_handler.CacheFileHandler(cache_path=session_cache_path())
     # cache_handler = spotipy.cache_handler.FlaskSessionCacheHandler(session)
     auth_manager = oauth2.SpotifyOAuth(cache_handler=cache_handler,client_id=client_id, client_secret=client_secret, redirect_uri=redirect_uri, scope=scope,show_dialog=True)
