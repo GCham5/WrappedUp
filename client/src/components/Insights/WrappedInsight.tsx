@@ -1,8 +1,7 @@
-
 import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
 import ReactWordcloud from 'react-wordcloud';
-import { PieChart } from './Charts/PieChart';
+import { PieChart } from '../Charts/PieChart';
 
 
 export default function WrappedInsight({ playlist }) {

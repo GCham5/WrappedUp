@@ -42,8 +42,6 @@ export default function TopArtistsOverTime({ playlistData, userData }) {
 
     // get all the artists in all of the Wrappeds
     const allArtistsInPlaylists = playlistData.map(playlist => playlist.artists)
-    // console.log(allArtistsInPlaylists)
-    // console.log(topFiveArtists)
 
     // Loop through each top artist and check if they appeared in any of the Wrapped Playlists.
     // If they did, add the count (included in the allArtistsInPlaylists). If they did not, add 0
@@ -57,7 +55,6 @@ export default function TopArtistsOverTime({ playlistData, userData }) {
             let found = false
             for (const artist in playlist) {
                 if (artist === id) {
-                    console.log(artist)
                     artistCount['counts'].push(playlist[artist]['count'])
                     found = true
                 }
@@ -140,7 +137,6 @@ export default function TopArtistsOverTime({ playlistData, userData }) {
                 Staying Loyal? Here's how many times your top five artists of all time appeared in your Wrappeds
             </Typography>
             <Line options={options} data={chartData} style={style} />
-
         </>
     )
 }

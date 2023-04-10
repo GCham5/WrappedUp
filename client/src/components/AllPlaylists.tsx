@@ -6,6 +6,8 @@ import Link from 'next/link'
 import { LineChart } from './Charts/LineChart'
 import PlaylistCard from '@/components/subComponents/PlaylistCard'
 import Grid from '@mui/material/Grid';
+import Chip from '@mui/material/Chip';
+
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -29,8 +31,9 @@ export default function AllPlaylists({ playlists }) {
                     spacing={5}
                 >
                     {playlists.map(playlist => (
-                        <Grid item key={playlist.id} xs={12} sm={6} md={4} lg={3}>
-                            <PlaylistCard playlist={playlist} />
+                        <Grid item key={playlist.id}>
+                            <Chip label={playlist.name} color="success" />
+                            {/* <PlaylistCard playlist={playlist} /> */}
                         </Grid>
                     ))}
                 </Grid>

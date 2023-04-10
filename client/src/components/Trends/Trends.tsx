@@ -1,7 +1,9 @@
-import { LineChart } from './Charts/LineChart'
-import TopArtistsOverTime from '../components/TopArtistsOverTime'
+import { LineChart } from '../Charts/LineChart'
+import TopArtistsOverTime from './TopArtistsOverTime'
 import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
+import Overview from './Overview';
+import GenresOverTime from './GenresOverTime';
 
 export default function Trends({ playlistData, userData }) {
 
@@ -26,6 +28,9 @@ export default function Trends({ playlistData, userData }) {
                         Trends
                     </Typography>
                 </Grid>
+                <Grid item xs={12}>
+                    <Overview playlistData={playlistData} />
+                </Grid>
                 <Grid item xs={6}>
                     <Typography variant="h6" gutterBottom>
                         Are Your Playlists Getting Longer or Is It Just Us?
@@ -38,9 +43,24 @@ export default function Trends({ playlistData, userData }) {
                     </Typography>
                     <LineChart title={''} data={playlistData} dataset={[{ 'key': 'mood', 'label': 'Mood' }]} value={''} />
                 </Grid>
-                <Grid item xs={12}>
+                <Grid item xs={6}>
+                    <Typography variant="h6" gutterBottom>
+                        Were you dancing or were you crying?
+                    </Typography>
+                    <LineChart title={''} data={playlistData} dataset={[{ 'key': 'dance', 'label': 'Danceable' }]} value={''} />
+                </Grid>
+                <Grid item xs={6}>
+                    <Typography variant="h6" gutterBottom>
+                        Leader or follower?
+                    </Typography>
+                    <LineChart title={''} data={playlistData} dataset={[{ 'key': 'popularity', 'label': 'Popularity' }]} value={''} />
+                </Grid>
+                <Grid item xs={8}>
                     <TopArtistsOverTime playlistData={playlistData} userData={userData} />
                 </Grid>
+                {/* <Grid item xs={8}>
+                    <GenresOverTime playlistData={playlistData} />
+                </Grid> */}
 
                 {/* <LineChart title={'Features Of Wrapped Playlists Over Time'} playlistData={playlistData} dataset={[{ 'key': 'acousticness', 'label': 'Acousticness' }, { 'key': 'danceability', 'label': 'Danceability' }]} value={'mean'} /> */}
             </Grid>

@@ -3,8 +3,8 @@ import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
 import Chip from '@mui/material/Chip';
 import Divider from '@mui/material/Divider';
-import WrappedInsight from './WrappedInsight';
-import PlaylistCard from './subComponents/PlaylistCard';
+import WrappedInsight from '../Insights/WrappedInsight';
+import PlaylistCard from '../subComponents/PlaylistCard';
 
 
 export default function Overview({ playlistData }) {
@@ -42,7 +42,6 @@ export default function Overview({ playlistData }) {
     // totalDuration
     const { minPlaylist: shortestWrapped, maxPlaylist: longestWrapped } = findMinMax('totalDuration');
     minMaxData.shortestWrapped = shortestWrapped;
-    console.log(minMaxData.shortestWrapped)
     minMaxData.longestWrapped = longestWrapped;
 
     // mood
