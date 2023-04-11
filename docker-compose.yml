@@ -1,0 +1,30 @@
+version: "3.8"
+
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "5001:5001"
+    depends_on:
+      - redis
+    # volumes:
+    #   # - sessions:/app/sessions
+    #   - ./backend/.spotify_caches:/app/.spotify_caches
+    #   - .:/code
+    environment:
+      FLASK_DEBUG: "true"
+      PYTHONUNBUFFERED: 1
+      SESSION_CACHE_PATH: "/app/.spotify_caches"
+
+  frontend:
+    build: ./client
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+
+  redis:
+    image: "redis:alpine"
+    ports:
+      - "6379:6379"
+    hostname: redis
