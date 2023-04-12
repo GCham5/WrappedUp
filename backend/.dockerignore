@@ -1,0 +1,17 @@
+# Ignore local Python settings
+.vscode/
+__pycache__/
+*.py[cod]
+
+# Ignore local Flask settings
+instance/
+# .env
+
+# Ignore pip cache
+*.log
+*.cfg
+build/
+dist/
+venv/
+__pycache__/
+*.egg-info/
