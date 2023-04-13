@@ -1,5 +1,6 @@
-from flask import Blueprint, jsonify, redirect, request
-from spotipy_handler import authorize, handle_callback, clear_session, get_playlists, get_user
+from flask import Blueprint, jsonify, redirect, request,  make_response
+from flask_cors import CORS
+from spotipy_handler import handle_callback, clear_session, get_playlists, get_user, authAndCallback, get_auth_url, set_session
 from dotenv import load_dotenv
 import os
 
@@ -7,16 +8,26 @@ load_dotenv()
 
 routes = Blueprint('routes', __name__)
 
+CORS(routes,resources={r"/*": {"origins": "*"}}, supports_credentials=True)
+
+@routes.route('/test')
+def test():
+    print('test')
+    return 'sup'
 
 @routes.route("/")
 def login():
-    auth_url = authorize()
-    return redirect(auth_url)
+    auth_url = get_auth_url()
+    return jsonify(auth_url)
 
 @routes.route("/callback")
 def callback():
     redirect_url = handle_callback()
     return redirect(redirect_url)
+
+@routes.route("/authorize")
+def authorize():
+    return jsonify(set_session(request.code))
 
 @routes.route('/sign_out')
 def sign_out():
@@ -26,7 +37,7 @@ def sign_out():
 @routes.route('/user')
 def user():
     try:
-        user = get_user(request.uuid)
+        user = get_user('blah')
     except Exception as e:
         print(e)
     return user
@@ -43,11 +54,10 @@ def user():
 @routes.route('/wrapped_playlists', methods=['GET'])
 def get_wrapped_playlists():
     try:
-        wrapped_playlists = get_playlists(request.uuid)
+        wrapped_playlists = get_playlists('blah')
     except Exception as e:
         print(e)
         return redirect('/')
-
     return jsonify(wrapped_playlists)
 
 
@@ -55,5 +65,5 @@ def get_wrapped_playlists():
 def extract_access_token():
     header_value = request.headers.get('Authorization')
     if header_value is not None and header_value.startswith('Bearer '):
-        uuid = header_value.split(' ')[1]
-        request.uuid = uuid
+        code = header_value.split(' ')[1]
+        request.code = code

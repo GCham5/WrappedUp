@@ -9,6 +9,7 @@ __pycache__/
 # Cache folders
 .spotify_caches/
 flask_session/
+.flask_session/
 
 # Distribution / packaging
 .Python

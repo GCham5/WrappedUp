@@ -1,12 +1,14 @@
 from collections import Counter
+import json
 from flask import session, request, abort
 from urllib.parse import urlencode
+from redis_client import redis, get_value
 import spotipy
 from spotipy import oauth2
 from dotenv import load_dotenv
 import os
 import statistics
-import uuid
+import hashlib
 
 
 load_dotenv()
@@ -16,6 +18,10 @@ client_secret = os.getenv("SPOTIPY_CLIENT_SECRET")
 redirect_uri = os.getenv("SPOTIPY_REDIRECT_URI")
 scope = "user-library-read playlist-read-private user-top-read"
 
+user_id = None
+hashed_id = None
+
+# REMOVE
 def session_cache_path():
     """Get the path to the session cache folder."""
     caches_folder = "./.spotify_caches/"
@@ -23,41 +29,79 @@ def session_cache_path():
         os.makedirs(caches_folder)
     return caches_folder + session.get('uuid')
 
-def authorize():
+# REMOVE
+def authAndCallback():
+    cache_handler = spotipy.cache_handler.FlaskSessionCacheHandler(session)
+
+    
+    # cache_handler = spotipy.cache_handler.FlaskSessionCacheHandler(session)
+    auth_manager = spotipy.oauth2.SpotifyOAuth(cache_handler=cache_handler,client_id=client_id, client_secret=client_secret, redirect_uri=redirect_uri, scope=scope,
+                                               show_dialog=True)
+
+    if request.args.get("code"):
+        print('first', session)
+        # session.pop("token_info", None)
+        # Step 2. Being redirected from Spotify auth page
+        auth_manager.get_access_token(request.args.get("code"))
+        return ('/')
+
+    if not auth_manager.validate_token(cache_handler.get_cached_token()):
+        # Step 1. Display sign in link when no token
+        print('second', session)
+        auth_url = auth_manager.get_authorize_url()
+        return (auth_url)
+
+    # Step 3. Signed in, display data
+    spotify = spotipy.Spotify(auth_manager=auth_manager)
+    return ('http://localhost:3000/home')
+
+def get_auth_url():
     # if not session.get('uuid'):
         # Step 1. Visitor is unknown, give random ID
-    session['uuid'] = str(uuid.uuid4())
- 
-    cache_handler = spotipy.cache_handler.CacheFileHandler(cache_path=session_cache_path())
+    # session['uuid'] = str(uuid.uuid4())
+    # print(session)
+    cache_handler = spotipy.cache_handler.FlaskSessionCacheHandler(session)
+
+    # cache_handler = spotipy.cache_handler.CacheFileHandler(cache_path=session_cache_path())
     auth_manager = oauth2.SpotifyOAuth(cache_handler=cache_handler,client_id=client_id, client_secret=client_secret, redirect_uri=redirect_uri, scope=scope,show_dialog=True)
 
     auth_url = auth_manager.get_authorize_url()
     return auth_url
 
 def handle_callback():
-    cache_handler = spotipy.cache_handler.CacheFileHandler(cache_path=session_cache_path())
+    
+    cache_handler = spotipy.cache_handler.FlaskSessionCacheHandler(session)
     auth_manager = oauth2.SpotifyOAuth(cache_handler=cache_handler,client_id=client_id, client_secret=client_secret, redirect_uri=redirect_uri, scope=scope,show_dialog=True)
+    # print(session)
 
     code = request.args.get('code')
-    auth_manager.get_access_token(code)
-    token_info = auth_manager.get_access_token(code)
-    access_token = token_info['access_token']
-    refresh_token = token_info['refresh_token']
-    uuid = session['uuid']
+    # auth_manager.get_access_token(code)
+    # token_info = auth_manager.get_access_token(code)
+    # access_token = token_info['access_token']
+    # refresh_token = token_info['refresh_token']
+    # uuid = session['uuid']
     # query_params = {
     #     'access_token': access_token,
     #     'refresh_token': refresh_token
     # }
     query_params = {
-        'uuid': uuid
+        'code': code
     }
     query_string = urlencode(query_params)
     redirect_url = f'http://localhost:3000/home?{query_string}'
-    # session['token_info'] = token_info
-    # session['access_token'] = token_info['access_token']
-    # spotify = spotipy.Spotify(auth_manager=auth_manager)
-    # print(spotify.me())
     return redirect_url
+
+def set_session(code):
+    # in case user does not sign out, this ensures no other token in session
+    session.pop("token_info", None)
+    cache_handler = spotipy.cache_handler.FlaskSessionCacheHandler(session)
+    # cache_handler = spotipy.cache_handler.FlaskSessionCacheHandler(session)
+    auth_manager = spotipy.oauth2.SpotifyOAuth(cache_handler=cache_handler,client_id=client_id, client_secret=client_secret, redirect_uri=redirect_uri, scope=scope,
+                                               show_dialog=True)
+    auth_manager.get_access_token(code)
+    
+    print('authorizedd', session)
+    return ''
     
 # TODO: properly implement
 def clear_session():
@@ -70,13 +114,21 @@ def get_user(uid):
     :param access_token: Spotify access token
     :return: Logged in Spotify uesr
     """
+
+    global user_id
+    global hashed_id
+
     sp = create_spotify_client(uid)
     if not sp:
         abort(401, "No token")
-
+    
     user = sp.current_user()
+    user_id = user['id']
+    hashed_id = hashlib.sha256(user_id.encode('utf-8')).hexdigest()
     top_artists = sp.current_user_top_artists(limit=20, offset=0, time_range='long_term')
     user['topArtists'] = top_artists['items']
+    # redis.hset(hashed_id, 'user', json.dumps(user))
+
     return user
 
 def get_playlists(uid):
@@ -90,38 +142,46 @@ def get_playlists(uid):
     sp = create_spotify_client(uid)
     if not sp:
         abort(401, "No token")
+    print(hashed_id) 
+    # check Redis
+    sorted_playlists = get_value(hashed_id, 'playlists')
 
-    all_playlists = []
-    offset = 0
-    while True:
-        playlists = sp.current_user_playlists(limit=50, offset=offset)
-        all_playlists.extend(playlists['items'])
-        if playlists['next']:
-            offset += 50
-        else:
-            break
+    # not found in Redis
+    if sorted_playlists is None:
+        all_playlists = []
+        offset = 0
+        while True:
+            playlists = sp.current_user_playlists(limit=50, offset=offset)
+            all_playlists.extend(playlists['items'])
+            if playlists['next']:
+                offset += 50
+            else:
+                break
 
-    wrapped_playlists = []
-    for playlist in all_playlists:
-        if playlist['name'].startswith('Your Top Songs'):
-            playlist_tracks = [item['track'] for item in sp.playlist_tracks(playlist['id'])['items']]
-            artists = get_artists(sp, playlist_tracks)
-            artists_data = get_artists_data(artists)
-            genres_data = get_genres(artists)
-            albums = get_albums_data(playlist_tracks)
-            audio_features = get_audio_features(sp, playlist_tracks)
-            mood = get_mood(audio_features)
-            dance = get_dance(audio_features)
-            popularity = get_popularity(playlist_tracks)
-            total_duration = get_total_duration(playlist_tracks)
-            cleaned_up_playlist = create_playlist_dict(playlist, playlist_tracks, artists_data, genres_data, albums, audio_features, mood, dance, popularity, total_duration)
-            wrapped_playlists.append(cleaned_up_playlist)
-    # if a user unliked then liked their Wrapped, it would appear first
-    # this ensures the playlists appear in correct order 
-    sorted_playlists = sorted(wrapped_playlists, key=lambda x: x['year'], reverse=True)
+        wrapped_playlists = []
+        for playlist in all_playlists:
+            if playlist['name'].startswith('Your Top Songs'):
+                playlist_tracks = [item['track'] for item in sp.playlist_tracks(playlist['id'])['items']]
+                artists = get_artists(sp, playlist_tracks)
+                artists_data = get_artists_data(artists)
+                genres_data = get_genres(artists)
+                albums = get_albums_data(playlist_tracks)
+                audio_features = get_audio_features(sp, playlist_tracks)
+                mood = get_mood(audio_features)
+                dance = get_dance(audio_features)
+                popularity = get_popularity(playlist_tracks)
+                total_duration = get_total_duration(playlist_tracks)
+                cleaned_up_playlist = create_playlist_dict(playlist, playlist_tracks, artists_data, genres_data, albums, audio_features, mood, dance, popularity, total_duration)
+                wrapped_playlists.append(cleaned_up_playlist)
+        # if a user unliked then liked their Wrapped, it would appear first
+        # this ensures the playlists appear in correct order 
+        sorted_playlists = sorted(wrapped_playlists, key=lambda x: x['year'], reverse=True)
+        sorted_playlists_json = json.dumps(sorted_playlists)
+        redis.hset(hashed_id, "playlists", sorted_playlists_json)
+   
+    print(get_recurring_tracks())
+    # print(sorted_playlists)
     return sorted_playlists
-
-
 
 def get_audio_features(sp, playlist_tracks):
     """
@@ -204,8 +264,6 @@ def get_popularity(playlist_tracks):
     # 100 because each Wrapped has 100 songs
     return sum([track['popularity'] for track in playlist_tracks if track is not None])/100
 
-
-
 def get_total_duration(playlist_tracks):
     """
     Gets the total duration of the playlist by summing up the durations of all the tracks.
@@ -239,8 +297,6 @@ def get_artists(sp, playlist_tracks):
 
     return full_artist_data
 
-
-
 def get_artists_data(artists):
     """
     Gets the count and images for the artists
@@ -262,7 +318,6 @@ def get_artists_data(artists):
     sorted_data = dict(sorted(artist_data.items(), key=lambda x: x[1]['count'], reverse=True))
 
     return sorted_data
-
 
 def get_albums_data(playlist_tracks):
     """
@@ -309,9 +364,42 @@ def get_genres(artists):
         genre_data[genre]['count'] += 1
 
     # sorted_data = dict(sorted(genre_data.items(), key=lambda x: x[1]['count'], reverse=True))
-
-    return genre_data
     # return sorted_data
+    return genre_data
+
+def get_recurring_tracks():
+    """
+    Gets tracks that appeared more than twice over the years.
+    
+    :return: Recurring track, along with the count and the years.
+    """
+
+    playlists = get_value(hashed_id, 'playlists')
+
+    if playlists is None:
+        # TODO: get playlists
+        pass
+
+    all_tracks_dict = {}
+    for playlist in playlists:
+        tracks = playlist['tracks']
+        for track in tracks:
+            track_id = track['id']
+            if track_id not in all_tracks_dict:
+                all_tracks_dict[track_id] = {
+                    'name': track['name'],
+                    'images': track['album']['images'],
+                    'years': []
+                }
+            all_tracks_dict[track_id]['years'].append(playlist['year'])
+
+    recurring_tracks = []
+    for track_id in all_tracks_dict:
+        track = all_tracks_dict[track_id]
+        if len(track['years']) > 1:
+            recurring_tracks.append(track)
+
+    return recurring_tracks
 
 
 def create_playlist_dict(playlist, playlist_tracks, artists_data, genre_data, albums, audio_features, mood, dance, popularity, total_duration):
@@ -357,9 +445,9 @@ def create_spotify_client(uid):
     :return: spotipy client
     """
    
-    session['uuid'] = uid
-    cache_handler = spotipy.cache_handler.CacheFileHandler(cache_path=session_cache_path())
-    # cache_handler = spotipy.cache_handler.FlaskSessionCacheHandler(session)
+    # session['uuid'] = uid
+    # cache_handler = spotipy.cache_handler.CacheFileHandler(cache_path=session_cache_path())
+    cache_handler = spotipy.cache_handler.FlaskSessionCacheHandler(session)
     auth_manager = oauth2.SpotifyOAuth(cache_handler=cache_handler,client_id=client_id, client_secret=client_secret, redirect_uri=redirect_uri, scope=scope,show_dialog=True)
 
 

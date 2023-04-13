@@ -12,7 +12,7 @@ services:
     #   - ./backend/.spotify_caches:/app/.spotify_caches
     #   - .:/code
     environment:
-      FLASK_DEBUG: "true"
+      FLASK_DEBUG: 1
       PYTHONUNBUFFERED: 1
       SESSION_CACHE_PATH: "/app/.spotify_caches"
 
