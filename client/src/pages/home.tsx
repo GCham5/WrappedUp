@@ -1,8 +1,8 @@
 import Head from 'next/head'
 import Image from 'next/image'
 import { useEffect, useRef, useState } from 'react'
-import Trends from '@/components/Trends'
-import Insights from '@/components/Insights'
+import Trends from '@/components/Trends/Trends'
+import Insights from '@/components/Insights/Insights'
 import AllPlaylists from '@/components/AllPlaylists'
 import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
@@ -36,13 +36,15 @@ export default function Home() {
         artists: {
             id: {
                 name: string,
-                count: number
+                count: number,
+                images: any[]
             }
         },
         albums: {
             id: {
                 name: string,
-                count: number
+                count: number,
+                images: any[]
             }
         },
         genres: {
@@ -87,22 +89,41 @@ export default function Home() {
         // TODO: make this its own function
         const queryString = window.location.search;
         const urlParams = new URLSearchParams(queryString);
-        const uuid = urlParams.get('uuid')
-        // const accessToken = urlParams.get('access_token');
-        // const refreshToken = urlParams.get('refresh_token');
+
+        const code = urlParams.get('code')
+
         // localStorage.setItem('access_token', accessToken);
         // localStorage.setItem('refresh_token', refreshToken);
         // setAccessToken(accessToken)
         // setRefreshToken(refreshToken)
 
 
+        async function authorize() {
+            // on refresh, it sends the code again which isn't allowed since the code has already been used
+            // hence I call ClearQueryParameters after this to ensure this only ever gets called on initial load
+            if (code) {
+                const res = await fetch('http://localhost:5001/authorize', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${code}`
+                    },
+                    credentials: 'include'
+                });
+                return await res.json();
+            } else {
+                // no code which means params have been cleared - don't make call
+                return ' '
+            }
+        }
         async function fetchWrappedPlaylists() {
-            const res = await fetch('http://127.0.0.1:5000/wrapped_playlists', {
+            const res = await fetch('http://localhost:5001/wrapped_playlists', {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${uuid}`
+                    // 'Authorization': `Bearer ${uuid}`
                 },
+                credentials: 'include'
             })
             const data = await res.json()
             setWrappedPlaylists(data)
@@ -110,12 +131,13 @@ export default function Home() {
         }
 
         async function getUser() {
-            const res = await fetch('http://127.0.0.1:5000/user', {
+            const res = await fetch('http://localhost:5001/user', {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${uuid}`
+                    // 'Authorization': `Bearer ${uuid}`
                 },
+                credentials: 'include'
             })
             const data = await res.json()
             setUser(data)
@@ -124,16 +146,27 @@ export default function Home() {
 
         // getTokens();
         // window.history.pushState({}, '', window.location.pathname);
-        fetchWrappedPlaylists();
-        getUser();
-        // clearQueryParams();
+        authorize()
+            .then(data => {
+                getUser()
+                    .then(user => {
+                        fetchWrappedPlaylists();
+                        clearQueryParams();
+                    })
+                    .catch(error => {
+                        console.error(error);
+                    })
+            })
+            .catch(error => {
+                console.error(error);
+            });
     }, [])
 
 
 
 
 
-    if (wrappedPlaylists.length === 0) {
+    if (wrappedPlaylists.length === 0 || !user) {
         return (
             <div>
                 <CircularProgress color="primary" size={80} />

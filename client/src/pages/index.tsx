@@ -7,6 +7,14 @@ import Link from 'next/link'
 const inter = Inter({ subsets: ['latin'] })
 
 export default function Login() {
+
+  const handleStartClick = async () => {
+    const response = await fetch('http://0.0.0.0:5001/');
+    const data = await response.json();
+    console.log(data)
+    window.location.href = data;
+  };
+
   return (
     <>
       <Head>
@@ -16,8 +24,8 @@ export default function Login() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className={styles.main}>
-        <a href="http://127.0.0.1:5000/">Click here to start</a>
-        <a href="http://127.0.0.1:5000/sign_out">Sign Out</a>
+        <a onClick={handleStartClick}>Click here to start</a>
+        <a href="http://localhost:5001/sign_out">Sign Out</a>
         <Link href='/home'>
           <button>Trends</button>
         </Link>
