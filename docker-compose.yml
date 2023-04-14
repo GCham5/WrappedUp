@@ -7,14 +7,12 @@ services:
       - "5001:5001"
     depends_on:
       - redis
-    # volumes:
-    #   # - sessions:/app/sessions
-    #   - ./backend/.spotify_caches:/app/.spotify_caches
-    #   - .:/code
+    volumes: [ './backend:/app' ]
     environment:
       FLASK_DEBUG: 1
       PYTHONUNBUFFERED: 1
       SESSION_CACHE_PATH: "/app/.spotify_caches"
+      FLASK_ENV: development
 
   frontend:
     build: ./client
@@ -22,6 +20,7 @@ services:
       - "3000:3000"
     depends_on:
       - backend
+    volumes: [ './client:/app' ]
 
   redis:
     image: "redis:alpine"
