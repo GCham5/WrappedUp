@@ -4,6 +4,7 @@ import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
 import Overview from './Overview';
 import GenresOverTime from './GenresOverTime';
+import RecurringItems from './RecurringItems';
 
 export default function Trends({ playlistData, userData }) {
 
@@ -61,6 +62,9 @@ export default function Trends({ playlistData, userData }) {
                 {/* <Grid item xs={8}>
                     <GenresOverTime playlistData={playlistData} />
                 </Grid> */}
+                <Grid item xs={12}>
+                    <RecurringItems numberOfYears={playlistData.length} />
+                </Grid>
 
                 {/* <LineChart title={'Features Of Wrapped Playlists Over Time'} playlistData={playlistData} dataset={[{ 'key': 'acousticness', 'label': 'Acousticness' }, { 'key': 'danceability', 'label': 'Danceability' }]} value={'mean'} /> */}
             </Grid>

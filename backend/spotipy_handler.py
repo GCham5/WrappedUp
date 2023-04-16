@@ -179,7 +179,7 @@ def get_playlists(uid):
         sorted_playlists_json = json.dumps(sorted_playlists)
         redis.hset(hashed_id, "playlists", sorted_playlists_json)
    
-    print(get_recurring_tracks())
+    # print('hello', get_recurring_tracks())
     # print(sorted_playlists)
     return sorted_playlists
 
@@ -333,7 +333,8 @@ def get_albums_data(playlist_tracks):
         if album['id'] not in album_data:
             album_data[album['id']] = {
                 'name': album['name'],
-                'count': 0
+                'count': 0,
+                'images': album['images']
             }
         album_data[album['id']]['count'] += 1
 
@@ -371,7 +372,7 @@ def get_recurring_tracks():
     """
     Gets tracks that appeared more than twice over the years.
     
-    :return: Recurring track, along with the count and the years.
+    :return: Recurring tracks, along with the images and the years.
     """
 
     playlists = get_value(hashed_id, 'playlists')
@@ -387,6 +388,7 @@ def get_recurring_tracks():
             track_id = track['id']
             if track_id not in all_tracks_dict:
                 all_tracks_dict[track_id] = {
+                    'id': track_id, #adding id as some songs are identical (name and artists) but different ids.. (could be due to metadata)
                     'name': track['name'],
                     'images': track['album']['images'],
                     'years': []
@@ -398,9 +400,67 @@ def get_recurring_tracks():
         track = all_tracks_dict[track_id]
         if len(track['years']) > 1:
             recurring_tracks.append(track)
-
     return recurring_tracks
 
+def get_recurring_artists_and_albums():
+    """
+    Gets artists and labums that appeared more than twice over the years.
+    
+    :return: Recurring artists and albums, along with the images and the years.
+    """
+
+    playlists = get_value(hashed_id, 'playlists')
+
+    if playlists is None:
+        # TODO: get playlists
+        pass
+
+    # get recurring artists
+    all_artists_dict = {}
+    for playlist in playlists:
+        artists = playlist['artists']
+        artist_ids = artists.keys()
+        for artist_id in artist_ids:
+            artist = artists[artist_id]
+            if artist_id not in all_artists_dict:
+                all_artists_dict[artist_id] = {
+                    'id': artist_id,
+                    'name': artist['name'],
+                    'images': artist['images'],
+                    'years': []
+                }
+            all_artists_dict[artist_id]['years'].append(playlist['year'])
+
+    recurring_artists = []
+    for artist_id in all_artists_dict:
+        artist = all_artists_dict[artist_id]
+        if len(artist['years']) > 1:
+            recurring_artists.append(artist)
+
+
+    # get recurring albums
+    all_albums_dict = {}
+    for playlist in playlists:
+        albums = playlist['albums']
+        album_ids = albums.keys()
+        for album_id in album_ids:
+            ablum = albums[album_id]
+            if album_id not in all_albums_dict:
+                all_albums_dict[album_id] = {
+                    'id': album_id,
+                    'name': ablum['name'],
+                    'images': ablum['images'],
+                    'years': []
+                }
+            all_albums_dict[album_id]['years'].append(playlist['year'])
+
+    recurring_albums = []
+    for album_id in all_albums_dict:
+        album = all_albums_dict[album_id]
+        if len(album['years']) > 1:
+            recurring_albums.append(album)
+
+    return recurring_artists, recurring_albums
 
 def create_playlist_dict(playlist, playlist_tracks, artists_data, genre_data, albums, audio_features, mood, dance, popularity, total_duration):
     """

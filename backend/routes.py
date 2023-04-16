@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, redirect, request,  make_response
 from flask_cors import CORS
-from spotipy_handler import handle_callback, clear_session, get_playlists, get_user, authAndCallback, get_auth_url, set_session
+from spotipy_handler import handle_callback, clear_session, get_playlists, get_user, get_auth_url, set_session, get_recurring_tracks, get_recurring_artists_and_albums
 from dotenv import load_dotenv
 import os
 
@@ -59,6 +59,26 @@ def get_wrapped_playlists():
         print(e)
         return redirect('/')
     return jsonify(wrapped_playlists)
+
+
+@routes.route('/recurring_artists_and_albums', methods=['GET'])
+def get_repeating_artists_and_albums():
+    try:
+        recurring_artists, recurring_albums = get_recurring_artists_and_albums()
+    except Exception as e:
+        print(e)
+        return redirect('/')
+    return jsonify(recurring_artists, recurring_albums)
+    
+
+@routes.route('/recurring_tracks', methods=['GET'])
+def get_repeating_tracks():
+    try:
+        recurring_tracks = get_recurring_tracks()
+    except Exception as e:
+        print(e)
+        return redirect('/')
+    return jsonify(recurring_tracks)
 
 
 # extract access token from header at each request
