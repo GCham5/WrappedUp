@@ -5,7 +5,7 @@ import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
-import RecurringCard from '@/components/subComponents/RecurringCard';
+import TrackCard from '@/components/subComponents/TrackCard';
 
 
 export default function RecurringItems({ numberOfYears }) {
@@ -158,7 +158,7 @@ export default function RecurringItems({ numberOfYears }) {
                     .filter((item) => item.years.length === occurance)
                     .map((item) => (
                         <Grid item key={item.id}>
-                            <RecurringCard item={item} />
+                            <TrackCard item={item} />
                         </Grid>
                     ))}
             </Grid>
