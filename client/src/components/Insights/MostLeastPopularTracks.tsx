@@ -34,9 +34,6 @@ export default function MostLeastPopularTracks({ playlist }) {
     }
 
     const { leastPopularTracks, mostPopularTracks } = findMostAndLeastPopularTracks();
-    console.log(leastPopularTracks)
-    console.log(mostPopularTracks)
-
 
     return (
         <>
@@ -55,7 +52,7 @@ export default function MostLeastPopularTracks({ playlist }) {
                     </Typography>
                 </Grid>
                 {leastPopularTracks.map(track => (
-                    < Grid item key={track.id} >
+                    < Grid item key={track.id} xs="auto" >
                         <TrackCard item={track} />
                     </Grid>
                 ))}

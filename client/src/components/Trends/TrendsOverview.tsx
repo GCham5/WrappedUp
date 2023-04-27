@@ -5,7 +5,7 @@ import Paper from '@mui/material/Paper';
 import PlaylistCard from '../subComponents/PlaylistCard';
 
 
-export default function Overview({ playlistData }) {
+export default function TrendsOverview({ playlistData }) {
 
     const minMaxData = {
         happiestWrapped: null,

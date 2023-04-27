@@ -6,6 +6,7 @@ import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
 import TrackCard from '@/components/subComponents/TrackCard';
+import { Paper } from '@mui/material';
 
 
 export default function RecurringItems({ numberOfYears }) {
@@ -73,7 +74,6 @@ export default function RecurringItems({ numberOfYears }) {
             })
             const data = await res.json()
             setRecurringTracks(data)
-            console.log(data)
         }
 
         async function fetchRecurringArtistsAndAlbums() {
@@ -87,8 +87,6 @@ export default function RecurringItems({ numberOfYears }) {
             const data = await res.json()
             setRecurringArtists(data[0])
             setRecurringAlbums(data[1])
-            console.log(data[0])
-            console.log(data[1])
         }
 
         fetchRecurringTracks();
@@ -115,18 +113,19 @@ export default function RecurringItems({ numberOfYears }) {
 
     return (
         <>
-            <Grid
-                container
-                direction="row"
-                justifyContent="center"
-                flexWrap='wrap'
-                alignItems='flex-end'
-                rowSpacing={5}
-                columnSpacing={5}
-            >
-                <Grid item>
-                    <Box sx={{ minWidth: 120 }}>
-                        <FormControl fullWidth>
+            <Paper elevation={12} sx={{ marginTop: 10, paddingBottom: 5, paddingLeft: 2, paddingRight: 2, bgcolor: 'primary.main' }}>
+                <Grid
+                    container
+                    direction="row"
+                    justifyContent="center"
+                    flexWrap='wrap'
+                    alignItems='flex-end'
+                    rowSpacing={5}
+                    columnSpacing={5}
+                >
+                    <Grid item xs={12}>
+                        {/* <Box sx={{ minWidth: 120 }}> */}
+                        <FormControl sx={{ m: 1, minWidth: 120 }}>
                             <InputLabel id="occurances">Occurances</InputLabel>
                             <Select
                                 labelId="occurances"
@@ -138,7 +137,7 @@ export default function RecurringItems({ numberOfYears }) {
                                 {menuItems}
                             </Select>
                         </FormControl>
-                        <FormControl fullWidth>
+                        <FormControl sx={{ m: 1, minWidth: 120 }}>
                             <InputLabel id="option">Item</InputLabel>
                             <Select
                                 labelId="option"
@@ -152,18 +151,17 @@ export default function RecurringItems({ numberOfYears }) {
                                 <MenuItem value={"albums"}>Albums</MenuItem>
                             </Select>
                         </FormControl>
-                    </Box>
+                        {/* </Box> */}
+                    </Grid>
+                    {data[selectedOption]
+                        .filter((item) => item.years.length === occurance)
+                        .map((item) => (
+                            <Grid item key={item.id} xs="auto">
+                                <TrackCard item={item} />
+                            </Grid>
+                        ))}
                 </Grid>
-                {data[selectedOption]
-                    .filter((item) => item.years.length === occurance)
-                    .map((item) => (
-                        <Grid item key={item.id}>
-                            <TrackCard item={item} />
-                        </Grid>
-                    ))}
-            </Grid>
-
-
+            </Paper>
         </>
     )
 

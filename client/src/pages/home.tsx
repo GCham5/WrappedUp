@@ -8,7 +8,150 @@ import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
 import CircularProgress from '@mui/material/CircularProgress'
 import Typography from '@mui/material/Typography';
-import { Button } from '@mui/material'
+import Avatar from '@mui/material/Avatar';
+import { Button, styled } from '@mui/material';
+import Tabs from '@mui/material/Tabs';
+import Tab from '@mui/material/Tab';
+import { makeStyles } from '@mui/material/styles';
+
+// const useStyles = makeStyles((theme) => ({
+//     root: {
+//         flexGrow: 1,
+//         backgroundColor: theme.palette.background.paper,
+//         display: 'flex',
+//         height: 224,
+//     },
+//     tabs: {
+//         borderRight: `1px solid ${theme.palette.divider}`,
+//     },
+//     tab: {
+//         minWidth: 0,
+//         width: 'auto',
+//         padding: '6px 16px',
+//         borderTopLeftRadius: '10px',
+//         borderTopRightRadius: '10px',
+//         borderBottom: 'none',
+//         marginRight: '8px',
+//         background: 'white',
+//         boxShadow: 'inset 0px 2px 2px rgba(0, 0, 0, 0.1)',
+//         zIndex: 1,
+//         position: 'relative',
+//         '&:before': {
+//             content: '""',
+//             position: 'absolute',
+//             top: '100%',
+//             left: 0,
+//             right: 0,
+//             height: '10px',
+//             zIndex: -1,
+//             borderBottomRightRadius: '10px',
+//             borderBottomLeftRadius: '10px',
+//             boxShadow: 'inset 0px 2px 2px rgba(0, 0, 0, 0.1)',
+//         },
+//     },
+//     selected: {
+//         background: theme.palette.primary.main,
+//         color: theme.palette.primary.contrastText,
+//         '&:before': {
+//             display: 'none',
+//         },
+//     },
+// }));
+
+
+// const CustomizedTabs = styled(Tabs)({
+//     '& .MuiTabs-indicator': {
+//         backgroundColor: '#00bcd4',
+//     },
+//     '& .MuiTab-root': {
+//         textTransform: 'none',
+//         minWidth: 0,
+//         marginRight: '16px',
+//         color: 'rgba(0, 0, 0, 0.54)',
+//         opacity: 1,
+//         fontWeight: 400,
+//         fontSize: '1rem',
+//         fontFamily: [
+//             // '-apple-system',
+//             // 'BlinkMacSystemFont',
+//             // '"Segoe UI"',
+//             // 'Roboto',
+//             '"Helvetica Neue"',
+//             // 'Arial',
+//             // 'sans-serif',
+//             // '"Apple Color Emoji"',
+//             // '"Segoe UI Emoji"',
+//             // '"Segoe UI Symbol"',
+//         ].join(','),
+//         '&.Mui-selected': {
+//             color: '#00bcd4',
+//             fontWeight: 500,
+//         },
+//     },
+//     '& .MuiTab-textColorPrimary.Mui-selected': {
+//         color: '#00bcd4',
+//     },
+// });
+
+const CustomizedTabs = styled(Tabs)({
+    '& .MuiTabs-indicator': {
+        display: 'none',
+    },
+    '& .MuiTab-root': {
+        textTransform: 'none',
+        minWidth: 0,
+        marginRight: '16px',
+        color: 'rgba(0, 0, 0, 0.54)',
+        opacity: 1,
+        fontWeight: 400,
+        fontSize: '1rem',
+        fontFamily: [
+            '-apple-system',
+            'BlinkMacSystemFont',
+            '"Segoe UI"',
+            'Roboto',
+            '"Helvetica Neue"',
+            'Arial',
+            'sans-serif',
+            '"Apple Color Emoji"',
+            '"Segoe UI Emoji"',
+            '"Segoe UI Symbol"',
+        ].join(','),
+        '&.Mui-selected': {
+            color: '#000',
+            fontWeight: 500,
+            background: 'white',
+            borderTop: '2px solid #007aff',
+            borderBottom: 'none',
+            borderLeft: '1px solid #d3d3d3',
+            borderRight: '1px solid #d3d3d3',
+            borderRadius: '10px 10px 0 0',
+            zIndex: 1,
+            position: 'relative',
+            '&:after': {
+                content: '""',
+                position: 'absolute',
+                top: '-2px',
+                left: '-1px',
+                right: '-1px',
+                height: '2px',
+                background: 'white',
+                zIndex: 2,
+            },
+            '&:before': {
+                content: '""',
+                position: 'absolute',
+                bottom: '-1px',
+                left: '-1px',
+                right: '-1px',
+                height: '1px',
+                background: '#d3d3d3',
+                zIndex: 2,
+            },
+        },
+    },
+});
+
 
 export default function Home() {
 
@@ -32,6 +175,10 @@ export default function Home() {
         totalDuration: number;
         url: string;
         year: string;
+        color: string;
+        dance: number;
+        mood: number;
+        popularity: number;
         audioFeatures: any; // cleanup
         artists: {
             id: {
@@ -68,7 +215,7 @@ export default function Home() {
 
     const [wrappedPlaylists, setWrappedPlaylists] = useState<PlaylistData[]>([])
     const [user, setUser] = useState<User>();
-    const [activeTab, setActiveTab] = useState('trends');
+    const [activeTab, setActiveTab] = useState('Trends');
     const [accessToken, setAccessToken] = useState('');
     const [refreshToken, setRefreshToken] = useState('')
 
@@ -79,7 +226,7 @@ export default function Home() {
 
     const sectionRef = useRef(null);
 
-    const handleTabClick = (tab: string) => {
+    const handleTabClick = (event: React.ChangeEvent<{}>, tab: string) => {
         setActiveTab(tab);
         sectionRef.current.scrollIntoView({ behavior: 'smooth' });
     }
@@ -163,9 +310,6 @@ export default function Home() {
     }, [])
 
 
-
-
-
     if (wrappedPlaylists.length === 0 || !user) {
         return (
             <div>
@@ -206,6 +350,7 @@ export default function Home() {
                         <Typography variant="h5" gutterBottom>
                             Hello,  {user.display_name}
                         </Typography>
+                        <Avatar alt={user.display_name} src={user.images[0].url} sx={{ width: 56, height: 56 }} />
 
                     </Grid>
                     <Grid
@@ -213,15 +358,21 @@ export default function Home() {
                         justifyContent="center"
                         item xs={12}
                     >
-                        <Button onClick={() => handleTabClick('trends')}>Trends</Button>
-                        <Button onClick={() => handleTabClick('insights')}>Insights</Button>
+                        <CustomizedTabs value={activeTab} onChange={handleTabClick} centered>
+                            <Tab label="Trends" value="Trends" />
+                            <Tab label="Insights" value="Insights" />
+                        </CustomizedTabs>
+                        <Box borderBottom={1} width="100%" borderColor="#000" />
+
+                        {/* <Button onClick={() => handleTabClick('trends')}>Trends</Button>
+                        <Button onClick={() => handleTabClick('insights')}>Insights</Button> */}
                     </Grid>
                     <Grid item xs={12}>
                         <AllPlaylists playlists={wrappedPlaylists.map(data => ({ id: data.id, name: data.name, year: data.year, image: data.image, url: data.url }))} />
                     </Grid>
-                    <Grid item xs={12} ref={sectionRef}>
-                        {activeTab === 'trends' && <Trends playlistData={wrappedPlaylists} userData={user} />}
-                        {activeTab === 'insights' && <Insights playlistData={wrappedPlaylists} userData={user} />}
+                    <Grid item xs={12} ref={sectionRef} id='homeone'>
+                        {activeTab === 'Trends' && <Trends playlistData={wrappedPlaylists} userData={user} />}
+                        {activeTab === 'Insights' && <Insights playlistData={wrappedPlaylists} userData={user} />}
                     </Grid>
                 </Grid>
 
