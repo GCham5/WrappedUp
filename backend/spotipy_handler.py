@@ -1,4 +1,3 @@
-from collections import Counter
 import json
 from flask import session, request, abort
 from urllib.parse import urlencode
@@ -9,6 +8,7 @@ from dotenv import load_dotenv
 import os
 import statistics
 import hashlib
+from colors import COLORS
 
 
 load_dotenv()
@@ -171,7 +171,8 @@ def get_playlists(uid):
                 dance = get_dance(audio_features)
                 popularity = get_popularity(playlist_tracks)
                 total_duration = get_total_duration(playlist_tracks)
-                cleaned_up_playlist = create_playlist_dict(playlist, playlist_tracks, artists_data, genres_data, albums, audio_features, mood, dance, popularity, total_duration)
+                color = COLORS.get(playlist['name'][-4:], '#FFFFFF')
+                cleaned_up_playlist = create_playlist_dict(playlist, playlist_tracks, artists_data, genres_data, albums, audio_features, mood, dance, popularity, total_duration, color)
                 wrapped_playlists.append(cleaned_up_playlist)
         # if a user unliked then liked their Wrapped, it would appear first
         # this ensures the playlists appear in correct order 
@@ -462,7 +463,7 @@ def get_recurring_artists_and_albums():
 
     return recurring_artists, recurring_albums
 
-def create_playlist_dict(playlist, playlist_tracks, artists_data, genre_data, albums, audio_features, mood, dance, popularity, total_duration):
+def create_playlist_dict(playlist, playlist_tracks, artists_data, genre_data, albums, audio_features, mood, dance, popularity, total_duration, color):
     """
     Creates a simplified, cleaner playlist objecct to send back to the client.
     
@@ -476,6 +477,7 @@ def create_playlist_dict(playlist, playlist_tracks, artists_data, genre_data, al
     :param dance: A value between 0-1 that indicates how dancable the year was
     :param popularity: Average popularity of the playlist
     :param total_duration: Total duration in hours of the playlist
+    :param color: Playlist color
     :return: Dictionary with playlist info
     """
     
@@ -493,7 +495,8 @@ def create_playlist_dict(playlist, playlist_tracks, artists_data, genre_data, al
         'albums': albums,
         'audioFeatures': audio_features,
         'mood': mood,
-        'dance': dance
+        'dance': dance,
+        'color': color
     }
     return playlist_dict
 
