@@ -1,6 +1,6 @@
 import Head from 'next/head'
 import Image from 'next/image'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useContext } from 'react'
 import Trends from '@/components/Trends/Trends'
 import Insights from '@/components/Insights/Insights'
 import AllPlaylists from '@/components/AllPlaylists'
@@ -13,6 +13,7 @@ import { Button, styled } from '@mui/material';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import { makeStyles } from '@mui/material/styles';
+import Navbar from '@/components/Navbar'
 
 // const useStyles = makeStyles((theme) => ({
 //     root: {
@@ -215,6 +216,7 @@ export default function Home() {
 
     const [wrappedPlaylists, setWrappedPlaylists] = useState<PlaylistData[]>([])
     const [user, setUser] = useState<User>();
+    // const { user, setUserContext } = useContext(UserContext);
     const [activeTab, setActiveTab] = useState('Trends');
     const [accessToken, setAccessToken] = useState('');
     const [refreshToken, setRefreshToken] = useState('')
@@ -226,7 +228,8 @@ export default function Home() {
 
     const sectionRef = useRef(null);
 
-    const handleTabClick = (event: React.ChangeEvent<{}>, tab: string) => {
+    const handleTabClick = (tab) => {
+        console.log('homeeeeeeeee', tab)
         setActiveTab(tab);
         sectionRef.current.scrollIntoView({ behavior: 'smooth' });
     }
@@ -288,6 +291,7 @@ export default function Home() {
             })
             const data = await res.json()
             setUser(data)
+            // setUserContext(data)
             console.log(data)
         }
 
@@ -326,6 +330,7 @@ export default function Home() {
                 <meta name="viewport" content="width=device-width, initial-scale=1" />
                 <link rel="icon" href="/favicon.ico" />
             </Head>
+            <Navbar user={user} handleTabClick={handleTabClick} />
             <Box sx={{ mx: 10, my: 5 }}>
                 <Grid
                     container
@@ -350,10 +355,13 @@ export default function Home() {
                         <Typography variant="h5" gutterBottom>
                             Hello,  {user.display_name}
                         </Typography>
-                        <Avatar alt={user.display_name} src={user.images[0].url} sx={{ width: 56, height: 56 }} />
+                        {/* <Avatar alt={user.display_name} src={user.images[0].url} sx={{ width: 56, height: 56 }} /> */}
 
                     </Grid>
-                    <Grid
+                    <Grid item xs={12}>
+                        <AllPlaylists playlists={wrappedPlaylists.map(data => ({ id: data.id, name: data.name, year: data.year, image: data.image, url: data.url }))} />
+                    </Grid>
+                    {/* <Grid
                         container
                         justifyContent="center"
                         item xs={12}
@@ -362,14 +370,12 @@ export default function Home() {
                             <Tab label="Trends" value="Trends" />
                             <Tab label="Insights" value="Insights" />
                         </CustomizedTabs>
-                        <Box borderBottom={1} width="100%" borderColor="#000" />
+                        <Box borderBottom={1} width="100%" borderColor="#000" /> */}
 
-                        {/* <Button onClick={() => handleTabClick('trends')}>Trends</Button>
+                    {/* <Button onClick={() => handleTabClick('trends')}>Trends</Button>
                         <Button onClick={() => handleTabClick('insights')}>Insights</Button> */}
-                    </Grid>
-                    <Grid item xs={12}>
-                        <AllPlaylists playlists={wrappedPlaylists.map(data => ({ id: data.id, name: data.name, year: data.year, image: data.image, url: data.url }))} />
-                    </Grid>
+                    {/* </Grid> */}
+
                     <Grid item xs={12} ref={sectionRef} id='homeone'>
                         {activeTab === 'Trends' && <Trends playlistData={wrappedPlaylists} userData={user} />}
                         {activeTab === 'Insights' && <Insights playlistData={wrappedPlaylists} userData={user} />}
