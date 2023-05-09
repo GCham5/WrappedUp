@@ -20,11 +20,11 @@ export default function PlaylistCard({ playlist }) {
           image={playlist.image}
           alt="playlist image"
         />
-        <CardContent>
+        {/* <CardContent>
           <Typography gutterBottom variant="h5" component="div">
             {playlist.name}
           </Typography>
-        </CardContent>
+        </CardContent> */}
       </CardActionArea>
     </Card>
   );

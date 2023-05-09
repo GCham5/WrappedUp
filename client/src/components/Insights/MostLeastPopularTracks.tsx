@@ -1,6 +1,6 @@
 import Grid from '@mui/material/Grid';
 import TrackCard from '@/components/subComponents/TrackCard';
-import { Typography } from '@mui/material';
+import { Paper, Typography } from '@mui/material';
 
 export default function MostLeastPopularTracks({ playlist }) {
 
@@ -37,26 +37,29 @@ export default function MostLeastPopularTracks({ playlist }) {
 
     return (
         <>
-            <Grid
-                container
-                direction="row"
-                justifyContent="center"
-                flexWrap='wrap'
-                alignItems='flex-end'
-                rowSpacing={5}
-                columnSpacing={5}
-            >
-                <Grid item xs={12}>
-                    <Typography>
-                        Your least popular songs of this year
-                    </Typography>
-                </Grid>
-                {leastPopularTracks.map(track => (
-                    < Grid item key={track.id} xs="auto" >
-                        <TrackCard item={track} />
+            <Paper>
+                <Grid
+                    container
+                    direction="row"
+                    justifyContent="center"
+                    flexWrap='wrap'
+                    alignItems='flex-end'
+                    rowSpacing={5}
+                    columnSpacing={5}
+                >
+                    <Grid item xs={12}>
+                        <Typography>
+                            Your least popular songs of this year
+                        </Typography>
                     </Grid>
-                ))}
-            </Grid>
+                    {leastPopularTracks.map(track => (
+                        < Grid item key={track.id} xs="auto" >
+                            <TrackCard item={track} />
+                        </Grid>
+                    ))}
+                </Grid>
+            </Paper>
+
         </>
     )
 }

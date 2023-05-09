@@ -28,7 +28,10 @@ export default function WrappedInsight({ playlist }) {
 
     return (
         <>
-            <Paper>
+            <Paper
+                elevation={6}
+                sx={{ paddingTop: 2, paddingBottom: 2, paddingLeft: 2, paddingRight: 2, bgcolor: playlist.color }}
+            >
                 <Grid
                     container
                     direction="row"
@@ -36,7 +39,7 @@ export default function WrappedInsight({ playlist }) {
                     flexWrap='wrap'
                     alignItems='flex-end'
                     rowSpacing={5}
-                    columnSpacing={5}
+                    columnSpacing={2}
                 >
                     <Grid item xs={12}>
                         <Typography variant="h3" gutterBottom>
@@ -53,18 +56,27 @@ export default function WrappedInsight({ playlist }) {
                             {playlist.totalDuration}
                         </Typography>
                     </Grid>
-                    <Grid item xs={6}>
+                    <Grid item xs={12}>
                         <MostLeastPopularTracks playlist={playlist} />
                     </Grid>
                     <Grid item xs={12}>
-                        <ReactWordcloud options={options} words={words} />
+                        <Paper elevation={12}>
+                            <ReactWordcloud options={options} words={words} />
+                        </Paper>
+                    </Grid>
+
+                    <Grid item xs={12} md={6}>
+                        <Paper elevation={12}>
+                            {/* <Typography variant='h6' gutterBottom>Genres</Typography> */}
+                            <PieChart data={playlist.genres} label={''} side={'right'} threshold={5} />
+                        </Paper>
                     </Grid>
                     <Grid item xs={12} md={6}>
-                        <PieChart data={playlist.genres} label={''} side={'right'} threshold={5} />
+                        <Paper elevation={12}>
+                            <PieChart data={playlist.albums} label={'# of Appearances'} side={'left'} threshold={2} />
+                        </Paper>
                     </Grid>
-                    <Grid item xs={12} md={6}>
-                        <PieChart data={playlist.albums} label={'# of Appearances'} side={'left'} threshold={2} />
-                    </Grid>
+
 
                     {/* <LineChart title={'Features Of Wrapped Playlists Over Time'} playlistData={playlistData} dataset={[{ 'key': 'acousticness', 'label': 'Acousticness' }, { 'key': 'danceability', 'label': 'Danceability' }]} value={'mean'} /> */}
                 </Grid>

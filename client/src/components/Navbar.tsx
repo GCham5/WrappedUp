@@ -46,7 +46,7 @@ export default function Navbar({ user, handleTabClick }) {
     };
 
     return (
-        <AppBar position="static">
+        <AppBar position="static" elevation={0}>
             <Container maxWidth="xl">
                 <Toolbar disableGutters>
                     {/* <AdbIcon sx={{ display: { xs: 'none', md: 'flex' }, mr: 1 }} /> */}

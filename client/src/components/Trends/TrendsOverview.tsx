@@ -1,11 +1,13 @@
-
 import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
 import Paper from '@mui/material/Paper';
 import PlaylistCard from '../subComponents/PlaylistCard';
+import PlaylistFlipCard from '../subComponents/PlaylistFlipCard';
+// import { useTheme } from '@mui/material/styles';
 
 
 export default function TrendsOverview({ playlistData }) {
+    // const theme = useTheme();
 
     const minMaxData = {
         happiestWrapped: null,
@@ -57,9 +59,20 @@ export default function TrendsOverview({ playlistData }) {
     minMaxData.uniqueWrapped = uniqueWrapped;
     minMaxData.basicWrapped = basicWrapped;
 
+    const playlists = [
+        { title: 'Happiest Year', playlist: minMaxData.happiestWrapped },
+        { title: 'Saddest Year', playlist: minMaxData.saddestWrapped },
+        { title: 'Longest Year', playlist: minMaxData.longestWrapped },
+        { title: 'Shortest Year', playlist: minMaxData.shortestWrapped },
+        { title: 'Danciest Year', playlist: minMaxData.danciestWrapped },
+        { title: 'Calmest Year', playlist: minMaxData.calmestWrapped },
+        { title: 'Most Unique Year', playlist: minMaxData.uniqueWrapped },
+        { title: 'Most Basic Year', playlist: minMaxData.basicWrapped },
+    ]
+
     return (
         <>
-            <Paper elevation={12} sx={{ paddingBottom: 5, paddingLeft: 2, paddingRight: 2, bgcolor: 'primary.main' }}>
+            <Paper elevation={12} sx={{ paddingBottom: 5, paddingLeft: 2, paddingRight: 2, bgcolor: 'background.default' }}>
                 <Grid
                     container
                     direction="row"
@@ -74,54 +87,11 @@ export default function TrendsOverview({ playlistData }) {
                             Overview Of Your Wrappeds
                         </Typography>
                     </Grid>
-                    <Grid item>
-                        <Typography variant="h6" gutterBottom>
-                            Happiest Year
-                        </Typography>
-                        <PlaylistCard playlist={minMaxData.happiestWrapped} />
-                    </Grid>
-                    <Grid item>
-                        <Typography variant="h6" gutterBottom>
-                            Saddest Year
-                        </Typography>
-                        <PlaylistCard playlist={minMaxData.saddestWrapped} />
-                    </Grid>
-                    <Grid item>
-                        <Typography variant="h6" gutterBottom>
-                            Longest Year
-                        </Typography>
-                        <PlaylistCard playlist={minMaxData.longestWrapped} />
-                    </Grid>
-                    <Grid item>
-                        <Typography variant="h6" gutterBottom>
-                            Shortest Year
-                        </Typography>
-                        <PlaylistCard playlist={minMaxData.shortestWrapped} />
-                    </Grid>
-                    <Grid item>
-                        <Typography variant="h6" gutterBottom>
-                            Danciest Year
-                        </Typography>
-                        <PlaylistCard playlist={minMaxData.danciestWrapped} />
-                    </Grid>
-                    <Grid item>
-                        <Typography variant="h6" gutterBottom>
-                            Calmest Year
-                        </Typography>
-                        <PlaylistCard playlist={minMaxData.calmestWrapped} />
-                    </Grid>
-                    <Grid item>
-                        <Typography variant="h6" gutterBottom>
-                            Most Unique Year
-                        </Typography>
-                        <PlaylistCard playlist={minMaxData.uniqueWrapped} />
-                    </Grid>
-                    <Grid item>
-                        <Typography variant="h6" gutterBottom>
-                            Most Basic Year
-                        </Typography>
-                        <PlaylistCard playlist={minMaxData.basicWrapped} />
-                    </Grid>
+                    {playlists.map(({ title, playlist }) => (
+                        <Grid item key={title}>
+                            <PlaylistFlipCard playlist={playlist} title={title} />
+                        </Grid>
+                    ))}
                 </Grid>
             </Paper>
 

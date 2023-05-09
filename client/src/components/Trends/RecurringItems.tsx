@@ -113,8 +113,9 @@ export default function RecurringItems({ numberOfYears }) {
 
     return (
         <>
-            <Paper elevation={12} sx={{ marginTop: 10, paddingBottom: 5, paddingLeft: 2, paddingRight: 2, bgcolor: 'primary.main' }}>
+            <Paper elevation={12} sx={{ marginTop: 10, paddingBottom: 5, paddingLeft: 2, paddingRight: 2, bgcolor: 'background.default' }} >
                 <Grid
+                    item
                     container
                     direction="row"
                     justifyContent="center"

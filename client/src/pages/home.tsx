@@ -348,11 +348,11 @@ export default function Home() {
                         alignContent="center"
                     >
 
-                        <Typography variant="h2" gutterBottom>
+                        {/* <Typography variant="h2" gutterBottom>
                             WrappedUp
-                        </Typography>
+                        </Typography> */}
 
-                        <Typography variant="h5" gutterBottom>
+                        <Typography variant="h3" gutterBottom>
                             Hello,  {user.display_name}
                         </Typography>
                         {/* <Avatar alt={user.display_name} src={user.images[0].url} sx={{ width: 56, height: 56 }} /> */}

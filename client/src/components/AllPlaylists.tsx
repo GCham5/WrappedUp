@@ -19,21 +19,23 @@ export default function AllPlaylists({ playlists }) {
                 container
                 justifyContent="center"
                 alignItems="center"
+                rowSpacing={5}
             >
                 <Grid item>
                     <h1>All Your Wrapped Playlists</h1>
                 </Grid>
                 <Grid
+                    item
                     container
                     direction="row"
                     justifyContent="center"
                     alignItems="center"
-                    spacing={5}
+                    spacing={4}
                 >
                     {playlists.map(playlist => (
                         <Grid item key={playlist.id}>
-                            <Chip label={playlist.name} color="success" />
-                            {/* <PlaylistCard playlist={playlist} /> */}
+                            {/* <Chip label={playlist.name} color="success" /> */}
+                            <PlaylistCard playlist={playlist} />
                         </Grid>
                     ))}
                 </Grid>

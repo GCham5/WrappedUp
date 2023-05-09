@@ -60,7 +60,7 @@ export function PieChart(props) {
 
     const options = {
         responsive: true,
-        color: 'white',
+        color: 'black',
         plugins: {
             legend: {
                 display: true,
