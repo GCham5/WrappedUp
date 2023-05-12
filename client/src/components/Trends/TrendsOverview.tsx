@@ -88,7 +88,7 @@ export default function TrendsOverview({ playlistData }) {
                         </Typography>
                     </Grid>
                     {playlists.map(({ title, playlist }) => (
-                        <Grid item key={title}>
+                        <Grid item key={title + 'TO'}>
                             <PlaylistFlipCard playlist={playlist} title={title} />
                         </Grid>
                     ))}

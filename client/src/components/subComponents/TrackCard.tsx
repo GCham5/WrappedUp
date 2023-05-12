@@ -53,6 +53,11 @@ export default function TrackCard({ item }) {
                                     ))}
                                 </div>
                             )}
+                            {item.count && (
+                                // <Grid item key={item.id}>
+                                <Chip label={item.count} color="success" key={item.id} sx={{ margin: "2px" }} />
+                                // </Grid>
+                            )}
                         </CardContent>
                     </Grid>
                     {/* </CardActionArea> */}

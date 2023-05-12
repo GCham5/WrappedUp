@@ -3,6 +3,7 @@ import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
 import ReactWordcloud from 'react-wordcloud';
 import { PieChart } from '../Charts/PieChart';
+import InsightsOverview from './InsightsOverview';
 import MostLeastPopularTracks from './MostLeastPopularTracks';
 
 
@@ -46,18 +47,8 @@ export default function WrappedInsight({ playlist }) {
                             {playlist.year}
                         </Typography>
                     </Grid>
-                    <Grid item xs={6}>
-                        <Typography variant="h6" gutterBottom>
-                            {playlist.name}
-                        </Typography>
-                    </Grid>
-                    <Grid item xs={6}>
-                        <Typography variant="h6" gutterBottom>
-                            {playlist.totalDuration}
-                        </Typography>
-                    </Grid>
                     <Grid item xs={12}>
-                        <MostLeastPopularTracks playlist={playlist} />
+                        <InsightsOverview playlistData={playlist} />
                     </Grid>
                     <Grid item xs={12}>
                         <Paper elevation={12}>
