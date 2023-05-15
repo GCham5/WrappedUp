@@ -5,6 +5,7 @@ import ReactWordcloud from 'react-wordcloud';
 import { PieChart } from '../Charts/PieChart';
 import InsightsOverview from './InsightsOverview';
 import MostLeastPopularTracks from './MostLeastPopularTracks';
+import TopFives from './TopFives';
 
 
 export default function WrappedInsight({ playlist }) {
@@ -31,7 +32,7 @@ export default function WrappedInsight({ playlist }) {
         <>
             <Paper
                 elevation={6}
-                sx={{ paddingTop: 2, paddingBottom: 2, paddingLeft: 2, paddingRight: 2, bgcolor: playlist.color }}
+                sx={{ paddingTop: 6, paddingBottom: 6, paddingLeft: 6, paddingRight: 6, bgcolor: playlist.color }}
             >
                 <Grid
                     container
@@ -47,22 +48,27 @@ export default function WrappedInsight({ playlist }) {
                             {playlist.year}
                         </Typography>
                     </Grid>
-                    <Grid item xs={12}>
+                    <Grid item xs={12} sx={{ paddingBottom: 5 }}>
                         <InsightsOverview playlistData={playlist} />
                     </Grid>
                     <Grid item xs={12}>
+                        <TopFives playlistData={playlist} />
+                    </Grid>
+                    <Grid item xs={12}>
+                        <Typography variant='h4' gutterBottom>Artists</Typography>
+
                         <Paper elevation={12}>
                             <ReactWordcloud options={options} words={words} />
                         </Paper>
                     </Grid>
-
                     <Grid item xs={12} md={6}>
+                        <Typography variant='h4' gutterBottom>Genres</Typography>
                         <Paper elevation={12}>
-                            {/* <Typography variant='h6' gutterBottom>Genres</Typography> */}
                             <PieChart data={playlist.genres} label={''} side={'right'} threshold={5} />
                         </Paper>
                     </Grid>
                     <Grid item xs={12} md={6}>
+                        <Typography variant='h4' gutterBottom>Albums</Typography>
                         <Paper elevation={12}>
                             <PieChart data={playlist.albums} label={'# of Appearances'} side={'left'} threshold={2} />
                         </Paper>
