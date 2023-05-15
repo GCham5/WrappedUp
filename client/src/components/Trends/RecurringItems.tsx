@@ -7,6 +7,7 @@ import FormControl from '@mui/material/FormControl';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
 import TrackCard from '@/components/subComponents/TrackCard';
 import { Paper } from '@mui/material';
+import TextField from '@mui/material/TextField';
 
 
 export default function RecurringItems({ numberOfYears }) {
@@ -47,6 +48,8 @@ export default function RecurringItems({ numberOfYears }) {
 
     const [occurance, setOccurance] = useState(2)
     const [selectedOption, setSelectedOption] = useState('tracks');
+
+    const [searchQuery, setSearchQuery] = useState("");
 
     const handleOccuranceChange = (event) => {
         setOccurance(event.target.value);
@@ -152,9 +155,13 @@ export default function RecurringItems({ numberOfYears }) {
                                 <MenuItem value={"albums"}>Albums</MenuItem>
                             </Select>
                         </FormControl>
+                        <TextField id="search" label="Search" variant="outlined" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
                         {/* </Box> */}
                     </Grid>
                     {data[selectedOption]
+                        .filter((item) =>
+                            item.name.toLowerCase().includes(searchQuery.toLowerCase())
+                        )
                         .filter((item) => item.years.length === occurance)
                         .map((item) => (
                             <Grid item key={item.id} xs="auto">
