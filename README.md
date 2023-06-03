@@ -27,7 +27,3 @@ WrappedUp is a data analysis tool that provides users with insights and trends b
 - Material-UI: UI component library for React.js.
 - Redis: In-memory data store for caching and quick retrieval of data.
 - Docker: Containerization platform for easy deployment and scalability.
-
-## License
-
-WrappedUp is released under the [MIT License](https://opensource.org/licenses/MIT).
