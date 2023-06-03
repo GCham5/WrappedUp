@@ -28,10 +28,6 @@ WrappedUp is a data analysis tool that provides users with insights and trends b
 - Redis: In-memory data store for caching and quick retrieval of data.
 - Docker: Containerization platform for easy deployment and scalability.
 
-## Contributing
-
-Contributions to WrappedUp are welcome! If you have any ideas, bug reports, or feature requests, please open an issue on the GitHub repository. Feel free to fork the project and submit pull requests as well.
-
 ## License
 
 WrappedUp is released under the [MIT License](https://opensource.org/licenses/MIT).
