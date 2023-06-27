@@ -17,7 +17,6 @@ WrappedUp is a data analysis tool that provides users with insights and trends b
 4. Explore the various sections and visualizations to gain insights into your listening habits.
 5. Customize and filter the data to focus on specific artists, genres, or time periods.
 6. Track your listening habits over time and compare them with previous years.
-7. Export and share your insights with friends and social media.
 
 ## Technologies Used
 
